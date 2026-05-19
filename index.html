@@ -2,622 +2,682 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Recomp Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Fredoka+One&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS — fluid, viewport-relative
-═══════════════════════════════════════════ */
-:root {
-  /* Colour palette */
-  --pink:    #F2A7C3;
-  --blue:    #3A6FD8;
-  --blue-lt: #7EB0E8;
-  --red:     #E84030;
-  --green:   #1A7A45;
-  --green-lt:#6FB87A;
-  --olive:   #8A8040;
-  --yellow:  #F0B830;
-  --silver:  #C8D4D8;
-  --white:   #F5F0E8;
-  /* Surface palette */
-  --bg:      #0A0C12;
-  --s1:      #0F1118;
-  --s2:      #141720;
-  --s3:      #1B1F2C;
-  --border:  #1E2438;
-  --border2: #272E48;
-  --text:    #EAEBf4;
-  --sub:     #7080A0;
-  --muted:   #1E2438;
+/* ══════════════════════════════════════
+   RECOMP TRACKER - Soft Gradient Aesthetic
+   Inspired: Contexts app (blobs), health score UI (rounded), chunky type
+   Fonts: Fredoka One (titles) · Poppins (body)
+══════════════════════════════════════ */
+:root{
+  /* ══ FITNESS APP PALETTE — ref image exact extraction ══
+     Source: lime/neon green blocks, hot pink panels, sky-blue cards,
+             near-black dark surfaces, pure-white high-contrast text      */
 
-  /* ── Fluid type scale (min | preferred | max) ──
-     Scales smoothly from 320px → 1600px+ screens   */
-  --fs-2xs: clamp(7px,  0.9vw,  9px);
-  --fs-xs:  clamp(9px,  1.1vw, 11px);
-  --fs-sm:  clamp(11px, 1.3vw, 13px);
-  --fs-md:  clamp(13px, 1.6vw, 16px);
-  --fs-lg:  clamp(16px, 2.0vw, 20px);
-  --fs-xl:  clamp(20px, 2.8vw, 28px);
-  --fs-2xl: clamp(26px, 3.5vw, 36px);
-  --fs-3xl: clamp(32px, 5.5vw, 68px);
+  /* Base surfaces */
+  --bg:       #0D0E10;   /* deepest near-black — page bg */
+  --surface:  #16181C;   /* card surface */
+  --surface2: #1E2026;   /* inset / secondary cell */
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.14);
 
-  /* ── Fluid spacing ── */
-  --sp-2xs: clamp(4px,  0.6vw,  8px);
-  --sp-xs:  clamp(8px,  1.0vw, 12px);
-  --sp-sm:  clamp(12px, 1.5vw, 18px);
-  --sp-md:  clamp(16px, 2.2vw, 28px);
-  --sp-lg:  clamp(24px, 3.5vw, 48px);
-  --sp-xl:  clamp(36px, 5.0vw, 72px);
+  /* Vivid accent blocks (direct from ref image panels) */
+  --lime:     #C9F63A;   /* neon lime — primary / on-track / CTA */
+  --lime-dk:  #1A2200;   /* dark text ON lime backgrounds */
+  --pink:     #F8BCE0;   /* hot pink — highlight / secondary */
+  --pink-dk:  #3D0028;   /* dark text ON pink backgrounds */
+  --sky:      #72CAFE;   /* sky blue — info / accent */
+  --sky-dk:   #002040;   /* dark text ON sky backgrounds */
+  --coral:    #FF6F5E;   /* coral/red — danger / gaining */
+  --amber:    #FFD84A;   /* amber — caution / slow */
 
-  /* ── Layout ── */
-  --max-w:      min(1100px, 94vw);
-  --panel-px:   clamp(14px, 3vw, 40px);
-  --card-r:     clamp(10px, 1.5vw, 16px);
-  --card-px:    clamp(14px, 2.2vw, 24px);
-  --card-py:    clamp(12px, 1.8vw, 20px);
+  /* Semantic roles */
+  --ink:      #F4F4F6;   /* primary text — softer than pure white */
+  --ink2:     #B0B4BC;   /* secondary text */
+  --ink3:     #6A6E78;   /* labels / tertiary */
+  --ok:       var(--lime);
+  --warn:     var(--amber);
+  --danger:   var(--coral);
+  --accent:   var(--sky);
+  --accent2:  #9AD8FF;
+
+  /* Legacy aliases (referenced throughout JS inline styles) */
+  --blob-red:  var(--coral);
+  --blob-yel:  var(--amber);
+  --blob-blue: var(--sky);
+  --blob-grn:  var(--lime);
+  --blob-pink: var(--pink);
+  --yellow:    var(--amber);
+
+  /* Fluid type */
+  --fs-2xs: clamp(9px,   0.95vw, 11px);
+  --fs-xs:  clamp(11px,  1.2vw,  13px);
+  --fs-sm:  clamp(13px,  1.4vw,  15px);
+  --fs-md:  clamp(15px,  1.7vw,  18px);
+  --fs-lg:  clamp(18px,  2.2vw,  23px);
+  --fs-xl:  clamp(22px,  3.0vw,  31px);
+  --fs-2xl: clamp(30px,  4.2vw,  46px);
+  --fs-3xl: clamp(38px,  5.8vw,  72px);
+
+  /* Fluid spacing */
+  --sp-xs:  clamp(6px,  1.0vw,  10px);
+  --sp-sm:  clamp(10px, 1.5vw,  16px);
+  --sp-md:  clamp(16px, 2.2vw,  24px);
+  --sp-lg:  clamp(24px, 3.5vw,  44px);
+  --sp-xl:  clamp(36px, 5.0vw,  64px);
+
+  /* Layout */
+  --max-w:    min(1060px, 94vw);
+  --px:       clamp(16px,3vw,48px);
+  --card-r:   clamp(16px,2.2vw,24px);
+  --card-px:  clamp(14px,2.2vw,24px);
+  --card-py:  clamp(12px,1.8vw,20px);
 }
 
-/* ─── RESET ─── */
-*,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
-html { scroll-behavior:smooth; -webkit-text-size-adjust:100% }
-body {
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
   background:var(--bg);
-  color:var(--text);
-  font-family:'Roboto',sans-serif;
+  color:var(--ink);
+  font-family:'Poppins',sans-serif;
   font-size:var(--fs-sm);
-  line-height:1.6;
+  line-height:1.7;
   min-height:100vh;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+
+/* ── GRADIENT BACKGROUND — ref-image athletic glow ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 60% 45% at 5% 0%,  rgba(58,111,216,.07) 0%,transparent 65%),
-    radial-gradient(ellipse 50% 40% at 95% 95%, rgba(26,122,69,.06)  0%,transparent 60%),
-    radial-gradient(ellipse 35% 25% at 50% 50%, rgba(240,184,48,.03) 0%,transparent 60%);
+    radial-gradient(ellipse 55% 42% at 0%   0%,   rgba(201,246,58,.07)  0%, transparent 60%),
+    radial-gradient(ellipse 50% 38% at 100% 100%, rgba(114,202,254,.07) 0%, transparent 58%),
+    radial-gradient(ellipse 42% 32% at 100% 0%,   rgba(248,188,224,.05) 0%, transparent 55%),
+    radial-gradient(ellipse 38% 30% at 0%  100%,  rgba(255,111,94,.04)  0%, transparent 52%),
+    radial-gradient(ellipse 30% 22% at 50%  50%,  rgba(255,216,74,.03)  0%, transparent 50%);
 }
-img,svg,canvas { max-width:100%; display:block }
-button { font-family:inherit; cursor:pointer }
-::-webkit-scrollbar { width:5px; height:5px }
-::-webkit-scrollbar-track { background:var(--bg) }
-::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px }
+.blob-bg{display:none}
 
-/* ─── HERO ─── */
-.hero {
-  position:relative; text-align:center; z-index:1;
-  padding:var(--sp-xl) var(--panel-px) var(--sp-md);
-  border-bottom:1px solid var(--border); overflow:hidden;
-}
-.hero::after {
-  content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%);
-  width:min(700px,90vw); height:350px;
-  background:radial-gradient(ellipse,rgba(58,111,216,.1) 0%,transparent 70%);
-  pointer-events:none;
-}
-.hero h1 {
-  font-family:'Noto Serif',serif;
-  font-size:var(--fs-3xl);
-  font-weight:700; line-height:.92; letter-spacing:-.02em; color:var(--white);
-}
-.hero h1 em { color:var(--blue-lt); font-style:italic }
-.hero-sub {
-  margin-top:var(--sp-xs); color:var(--sub);
-  font-size:var(--fs-sm); letter-spacing:.05em;
-}
-.hero-kpis {
-  display:flex; justify-content:center; flex-wrap:wrap;
-  gap:1px; background:var(--border);
-  border:1px solid var(--border); border-radius:var(--card-r); overflow:hidden;
-  margin:var(--sp-md) auto 0; max-width:min(780px,96vw);
-}
-.hero-kpi {
-  background:var(--s1); flex:1;
-  min-width:clamp(60px,13vw,130px);
-  padding:clamp(10px,1.8vw,18px) clamp(8px,1.5vw,16px);
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
   text-align:center;
+  padding:var(--sp-xl) var(--px) var(--sp-lg);
+  border-bottom:1px solid rgba(255,255,255,.07);
 }
-.kv {
-  font-family:'Noto Serif',serif;
-  font-size:clamp(16px,2.5vw,26px);
-  font-weight:700; line-height:1;
+/* accent underline on title — lime bar */
+.hero h1 span.hl{display:inline}
+.hero h1{
+  font-family:'Fredoka One',cursive;
+  font-size:var(--fs-3xl);
+  font-weight:400;
+  letter-spacing:-.01em;
+  color:#FFFFFF;
+  line-height:1;
+  color:var(--ink);
+  white-space:nowrap;
 }
-.kl {
-  font-size:clamp(7px,0.9vw,10px);
-  color:var(--sub); text-transform:uppercase; letter-spacing:.1em; margin-top:4px;
+.hero h1 em{color:#FFFFFF;font-style:normal}
+.hero-sub{
+  margin-top:var(--sp-xs);
+  color:var(--ink3);
+  font-size:var(--fs-xs);
+  font-weight:400;
+  letter-spacing:.04em;
+}
+/* KPI pill strip */
+.hero-kpis{
+  display:flex;justify-content:center;flex-wrap:wrap;
+  gap:var(--sp-xs);
+  margin:var(--sp-md) auto 0;
+  max-width:min(800px,96vw);
+}
+.kpill{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:999px;
+  padding:clamp(8px,1.2vw,12px) clamp(14px,2.2vw,22px);
+  display:flex;flex-direction:column;align-items:center;
+  min-width:clamp(72px,12vw,110px);
+  backdrop-filter:blur(8px);
+  transition:transform .15s;
+}
+.kpill:hover{transform:translateY(-2px)}
+.kpill-v{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(17px,2.2vw,24px);
+  line-height:1;
+}
+.kpill-l{
+  font-size:var(--fs-2xs);
+  color:var(--ink3);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-top:3px;
+  font-weight:500;
 }
 
-/* ─── STICKY NAV ─── */
-.topnav {
-  position:sticky; top:0; z-index:200;
-  background:rgba(10,12,18,.96); backdrop-filter:blur(20px);
+/* ── STICKY NAV ── */
+.topnav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(10,12,14,.94);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
 }
-.tabs-outer {
-  display:flex; justify-content:center;
-  overflow-x:auto; padding:0 var(--sp-sm);
+.tabs-outer{
+  display:flex;justify-content:center;
+  overflow-x:auto;padding:0 var(--sp-sm);
 }
-.tabs-outer::-webkit-scrollbar { display:none }
-.tabs { display:inline-flex; user-select:none; min-width:min-content }
-.tab {
-  background:none; border:none; cursor:grab;
-  color:var(--sub);
-  font-family:'Roboto',sans-serif;
-  font-size:clamp(10px,1.2vw,13px);
-  font-weight:500; letter-spacing:.04em;
-  padding:clamp(11px,1.6vw,16px) clamp(10px,1.8vw,20px);
-  border-bottom:2px solid transparent;
-  transition:color .2s,border-color .2s; white-space:nowrap;
+.tabs-outer::-webkit-scrollbar{display:none}
+.tabs{display:inline-flex;user-select:none;min-width:min-content;gap:2px;padding:6px 0}
+.tab{
+  background:transparent;border:none;cursor:grab;
+  color:var(--ink2);
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(11px,1.3vw,13px);
+  font-weight:500;letter-spacing:.02em;
+  padding:clamp(8px,1.2vw,10px) clamp(12px,1.8vw,18px);
+  border-radius:999px;
+  transition:all .2s;white-space:nowrap;
 }
-.tab:hover { color:var(--text) }
-.tab.on { color:var(--blue-lt); border-bottom-color:var(--blue) }
-.tab.drag-over { background:rgba(58,111,216,.12); border-radius:6px 6px 0 0 }
-.tab.dragging { opacity:.35; cursor:grabbing }
+.tab:hover{background:rgba(255,255,255,.05);color:var(--ink2)}
+.tab.on{
+  background:rgba(201,246,58,.12);
+  color:var(--lime);
+  border-bottom:2px solid var(--lime);
+}
+.tab.drag-over{background:rgba(91,155,213,.15)}
+.tab.dragging{opacity:.35;cursor:grabbing}
 
-/* ─── PANELS ─── */
-.panel {
-  display:none;
-  padding:var(--sp-md) var(--panel-px) clamp(48px,7vw,96px);
-  max-width:var(--max-w); margin:0 auto;
-  position:relative; z-index:1;
-}
-.panel.on { display:block }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px) }
-  to   { opacity:1; transform:translateY(0) }
-}
-.panel.on > * { animation:fadeUp .3s ease both }
-.panel.on > *:nth-child(2) { animation-delay:.05s }
-.panel.on > *:nth-child(3) { animation-delay:.10s }
-.panel.on > *:nth-child(4) { animation-delay:.15s }
-.panel.on > *:nth-child(5) { animation-delay:.20s }
+/* ── PANELS ── */
+.panel{display:none;padding:var(--sp-md) var(--px) clamp(48px,7vw,96px);max-width:var(--max-w);margin:0 auto;position:relative;z-index:1}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.panel.on>*{animation:fadeUp .3s ease both}
+.panel.on>*:nth-child(2){animation-delay:.05s}
+.panel.on>*:nth-child(3){animation-delay:.10s}
+.panel.on>*:nth-child(4){animation-delay:.15s}
 
-/* ─── SECTION TITLES ─── */
-.stitle {
-  font-family:'Noto Serif',serif;
-  font-size:clamp(9px,1.1vw,12px);
-  font-weight:600; color:var(--sub);
-  letter-spacing:.12em; text-transform:uppercase;
+/* ── SECTION LABEL ── */
+.slabel{
+  font-family:'Fredoka One',cursive;
+  font-size:var(--fs-lg);
+  color:var(--ink2);
   margin-bottom:var(--sp-sm);
-  display:flex; align-items:center; gap:var(--sp-xs);
+  display:flex;align-items:center;gap:var(--sp-xs);
 }
-.stitle::after { content:''; flex:1; height:1px; background:var(--border) }
+.slabel::after{content:'';flex:1;height:1px;border-radius:99px;background:linear-gradient(90deg,var(--lime),transparent)}
 
-/* ─── CARDS ─── */
-.card {
-  background:var(--s2); border:1px solid var(--border);
-  border-radius:var(--card-r); overflow:hidden;
-  margin-bottom:var(--sp-sm); transition:border-color .2s;
+/* ── CARDS ── */
+.card{
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--card-r);
+  overflow:hidden;
+  margin-bottom:var(--sp-sm);
+  transition:box-shadow .2s;
 }
-.card:hover { border-color:var(--border2) }
-.card-head {
-  display:flex; align-items:center; justify-content:space-between;
-  flex-wrap:wrap; gap:var(--sp-xs);
+.card:hover{box-shadow:0 4px 32px rgba(0,0,0,.3)}
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:var(--sp-xs);
   padding:var(--card-py) var(--card-px);
   border-bottom:1px solid var(--border);
-  background:rgba(255,255,255,.015);
+  background:rgba(255,255,255,.03);
 }
-.card-title {
-  font-family:'Noto Serif',serif;
-  font-size:var(--fs-md); font-weight:600; color:#fff;
+.card-title{
+  font-family:'Fredoka One',cursive;
+  font-size:var(--fs-lg);
+  font-weight:400;
+  color:var(--ink);
 }
-.card-sub { font-size:var(--fs-xs); color:var(--sub) }
-.card-body { padding:var(--card-py) var(--card-px) }
+.card-sub{font-size:var(--fs-2xs);color:var(--ink3)}
+.card-body{padding:var(--card-py) var(--card-px);font-size:var(--fs-xs);color:var(--ink2);line-height:1.7}
 
-/* ─── FLUID GRIDS ─── */
-.g2  { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:var(--sp-sm) }
-.g3  { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr)); gap:var(--sp-sm) }
-.g4s { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr)); gap:1px; background:var(--border) }
-.g4c { background:var(--s2); padding:var(--card-py) var(--card-px) }
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:var(--sp-sm)}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:var(--sp-sm)}
+.g4s{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:1px;background:rgba(255,255,255,.06)}
+.g4c{background:var(--surface);padding:var(--card-py) var(--card-px)}
 
-/* ─── BIG METRICS ─── */
-.bm  { font-family:'Noto Serif',serif; font-size:var(--fs-2xl); font-weight:700; line-height:1 }
-.bml { font-size:var(--fs-2xs); color:var(--sub); text-transform:uppercase; letter-spacing:.12em; margin-top:4px }
-.bms { font-size:var(--fs-xs); color:var(--sub); margin-top:3px }
+/* ── BIG METRICS ── */
+.bm{font-family:'Fredoka One',cursive;font-size:var(--fs-2xl);font-weight:400;line-height:1}
+.bml{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;font-weight:500}
+.bms{font-size:var(--fs-xs);color:var(--ink3);margin-top:3px}
 
-/* ─── PROGRESS BAR ─── */
-.pb  { height:clamp(5px,0.9vw,8px); background:var(--muted); border-radius:99px; overflow:hidden; margin-top:6px }
-.pbf { height:100%; border-radius:99px; transition:width .7s ease }
+/* ── PROGRESS BARS ── */
+.pb{height:clamp(6px,1vw,10px);background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:8px}
+.pbf{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 
-/* ─── PILLS / BADGES ─── */
-.sci-tag {
-  display:inline-block; font-size:var(--fs-2xs); color:var(--sub);
-  border:1px solid var(--border2); border-radius:4px;
-  padding:1px clamp(5px,0.8vw,8px); letter-spacing:.06em; text-transform:uppercase;
-}
-.sp {
-  display:inline-flex; align-items:center; gap:5px;
-  font-size:var(--fs-xs); font-weight:500;
-  padding:clamp(2px,0.4vw,4px) clamp(8px,1.2vw,12px);
-  border-radius:100px; letter-spacing:.04em;
-}
-.sp-g { background:rgba(26,122,69,.12);  color:#6FB87A; border:1px solid rgba(26,122,69,.3) }
-.sp-y { background:rgba(240,184,48,.1);  color:var(--yellow); border:1px solid rgba(240,184,48,.25) }
-.sp-p { background:rgba(126,176,232,.1); color:var(--blue-lt); border:1px solid rgba(126,176,232,.25) }
-.sp-r { background:rgba(232,64,48,.1);   color:#ff8070; border:1px solid rgba(232,64,48,.25) }
+/* ── PILLS / TAGS ── */
+.sci-tag{display:inline-block;font-size:var(--fs-2xs);color:var(--ink3);border:1px solid var(--border2);border-radius:999px;padding:2px 10px;letter-spacing:.05em;font-weight:500}
+.sp{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-xs);font-weight:600;padding:4px 12px;border-radius:999px;letter-spacing:.03em}
+.sp-g{background:rgba(200,241,53,.15);color:var(--lime);border:1px solid rgba(200,241,53,.3)}
+.sp-y{background:rgba(255,217,61,.15);color:var(--warn);border:1px solid rgba(255,217,61,.3)}
+.sp-p{background:rgba(126,200,240,.15);color:var(--accent);border:1px solid rgba(126,200,240,.3)}
+.sp-r{background:rgba(255,107,91,.15);color:var(--danger);border:1px solid rgba(255,107,91,.3)}
 
-/* ─── ALERTS ─── */
-.alert {
-  padding:clamp(10px,1.5vw,14px) clamp(12px,1.8vw,16px);
-  border-radius:clamp(7px,1vw,10px);
-  font-size:var(--fs-xs); line-height:1.7;
-  margin-bottom:var(--sp-sm); border-left:3px solid;
-}
-.al-g { background:rgba(26,122,69,.08);  border-color:var(--green);  color:var(--green-lt) }
-.al-y { background:rgba(240,184,48,.07); border-color:var(--yellow); color:var(--yellow) }
-.al-r { background:rgba(232,64,48,.07);  border-color:var(--red);    color:#ff8070 }
-.al-b { background:rgba(58,111,216,.07); border-color:var(--blue);   color:var(--blue-lt) }
-.al-o { background:rgba(242,167,195,.07);border-color:var(--pink);   color:var(--pink) }
+/* ── ALERTS ── */
+.alert{padding:clamp(11px,1.5vw,15px) clamp(13px,1.8vw,18px);border-radius:var(--card-r);font-size:var(--fs-xs);line-height:1.7;margin-bottom:var(--sp-sm);border-left:4px solid}
+.al-g{background:rgba(201,246,58,.07);border-color:var(--lime);color:var(--lime)}
+.al-y{background:rgba(255,217,61,.12);border-color:var(--warn);color:var(--warn)}
+.al-r{background:rgba(242,96,80,.1);border-color:var(--danger);color:var(--danger)}
+.al-b{background:rgba(114,202,254,.08);border-color:var(--sky);color:var(--sky)}
+.al-o{background:rgba(242,167,195,.1);border-color:var(--blob-pink);color:var(--blob-pink)}
 
-/* ─── SAVE TOOLBAR ─── */
-.save-bar {
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
-  gap:var(--sp-xs); padding:var(--card-py) var(--card-px);
-  background:var(--s3); border:1px solid var(--border);
-  border-radius:var(--card-r); margin-bottom:var(--sp-sm);
+/* ── SAVE TOOLBAR ── */
+.save-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:var(--sp-xs);padding:var(--card-py) var(--card-px);
+  background:var(--surface);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--card-r);margin-bottom:var(--sp-sm);
 }
-.save-bar-left {
-  display:flex; align-items:center; gap:var(--sp-xs);
-  flex-wrap:wrap; font-size:var(--fs-xs);
+.save-bar-left{display:flex;align-items:center;gap:var(--sp-xs);flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink2)}
+.save-indicator{width:8px;height:8px;border-radius:50%;background:var(--ink3);flex-shrink:0;transition:background .3s}
+.save-indicator.saved{background:var(--lime)}
+.save-indicator.saving{background:var(--warn)}
+.save-bar-right{display:flex;gap:var(--sp-xs);flex-wrap:wrap}
+.btn{
+  font-family:'Poppins',sans-serif;
+  font-size:var(--fs-xs);font-weight:600;
+  padding:clamp(6px,1vw,9px) clamp(12px,1.8vw,18px);
+  border-radius:999px;border:1.5px solid;letter-spacing:.02em;
+  transition:all .2s;cursor:pointer;
 }
-.save-indicator {
-  width:8px; height:8px; border-radius:50%;
-  background:var(--sub); flex-shrink:0; transition:background .3s;
-}
-.save-indicator.saved  { background:var(--green-lt) }
-.save-indicator.saving { background:var(--yellow) }
-.save-bar-right { display:flex; gap:var(--sp-xs); flex-wrap:wrap }
-.btn {
-  font-size:var(--fs-xs); font-weight:500;
-  padding:clamp(5px,0.9vw,8px) clamp(10px,1.6vw,16px);
-  border-radius:6px; border:1px solid; letter-spacing:.04em; transition:all .2s;
-}
-.btn-save   { background:rgba(26,122,69,.15);  border-color:rgba(26,122,69,.4);  color:var(--green-lt) }
-.btn-save:hover   { background:rgba(26,122,69,.3) }
-.btn-clear  { background:rgba(232,64,48,.1);   border-color:rgba(232,64,48,.3);  color:#ff8070 }
-.btn-clear:hover  { background:rgba(232,64,48,.25) }
-.btn-export { background:rgba(58,111,216,.1);  border-color:rgba(58,111,216,.3); color:var(--blue-lt) }
-.btn-export:hover { background:rgba(58,111,216,.2) }
+.btn-save{background:rgba(200,241,53,.1);border-color:rgba(200,241,53,.4);color:var(--lime)}
+.btn-save:hover{background:rgba(200,241,53,.2)}
+.btn-clear{background:rgba(255,107,91,.1);border-color:rgba(255,107,91,.35);color:var(--danger)}
+.btn-clear:hover{background:rgba(255,107,91,.2)}
+.btn-export{background:rgba(126,200,240,.1);border-color:rgba(126,200,240,.35);color:var(--sky)}
+.btn-export:hover{background:rgba(126,200,240,.2)}
 
-/* ─── WEEK LOG GRID ─── */
-.wgrid {
+/* ── WEEK LOG GRID ── */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(108px,13vw,152px),1fr));gap:clamp(8px,1.2vw,12px)}
+.wc{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:clamp(14px,2vw,20px);
+  padding:clamp(11px,1.6vw,16px) clamp(11px,1.5vw,15px);
+  position:relative;transition:all .25s;
+}
+.wc.logged{
+  border-color:var(--sky);
+  background:rgba(126,200,240,.07);
+  box-shadow:0 2px 12px rgba(91,155,213,.15);
+}
+.wc.current{
+  border-color:var(--lime);border-width:2px;
+  background:rgba(200,241,53,.06);
+  box-shadow:0 4px 20px rgba(75,174,127,.18);
+}
+.wc.future{opacity:.35;pointer-events:none}
+.wc-dot{position:absolute;top:9px;left:10px;width:7px;height:7px;border-radius:50%}
+.wc-num{font-family:'Poppins',sans-serif;font-size:var(--fs-2xs);color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;padding-left:16px;font-weight:600}
+.wc-date{font-family:'Poppins',sans-serif;font-size:var(--fs-2xs);color:var(--sky);margin-bottom:6px;padding-left:16px;opacity:.9;font-weight:500}
+.wc-inp-wrap{position:relative}
+.wc-inp{
+  width:100%;background:transparent;border:none;
+  border-bottom:2px solid var(--border2);
+  color:var(--ink);font-family:'Fredoka One',cursive;
+  font-size:clamp(17px,2.4vw,22px);font-weight:400;
+  padding:3px 22px 3px 0;outline:none;transition:border-color .2s;
+}
+.wc-inp:focus{border-bottom-color:var(--lime)}
+.wc-inp::placeholder{color:rgba(255,255,255,.2);font-size:clamp(13px,1.8vw,16px)}
+.wc-unit{position:absolute;right:0;top:5px;font-size:var(--fs-2xs);color:var(--ink3);font-weight:600;pointer-events:none}
+.wc-delta{font-size:var(--fs-xs);margin-top:6px;font-weight:600}
+.wc-proj{font-size:var(--fs-2xs);color:var(--ink3);margin-top:2px;font-weight:500}
+.wc-info{font-size:var(--fs-2xs);color:var(--sky);margin-top:2px;font-weight:500}
+.wc-del{
+  display:none;position:absolute;top:8px;right:8px;
+  width:clamp(18px,2.5vw,22px);height:clamp(18px,2.5vw,22px);
+  border-radius:50%;
+  background:rgba(255,107,91,.12);border:1.5px solid rgba(255,107,91,.3);
+  color:var(--danger);font-size:11px;font-weight:700;
+  align-items:center;justify-content:center;line-height:1;transition:background .15s;
+  cursor:pointer;
+}
+.wc-del:hover{background:rgba(255,107,91,.35)}
+.wc.logged .wc-del{display:flex}
+@keyframes flashSave{0%{background:rgba(200,241,53,.2)}100%{background:rgba(79,124,255,.08)}}
+.wc.flash{animation:flashSave .5s ease}
+
+/* ── TIMELINE ── */
+.timeline{position:relative}
+.timeline::before{content:'';position:absolute;left:clamp(20px,3vw,28px);top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--lime) 0%,rgba(255,255,255,.04) 100%);border-radius:99px}
+.mblock{position:relative;padding-left:clamp(50px,7vw,74px);margin-bottom:6px}
+.mdot{
+  position:absolute;left:clamp(13px,2vw,18px);top:20px;
+  width:clamp(14px,2.2vw,20px);height:clamp(14px,2.2vw,20px);border-radius:50%;
+  background:var(--bg);border:2.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;color:var(--ink3);z-index:1;transition:all .3s;
+}
+.mblock.mb-done .mdot{background:var(--lime);border-color:var(--lime);box-shadow:0 0 14px rgba(200,241,53,.4)}
+.mblock.mb-cur  .mdot{background:var(--sky);border-color:var(--sky);box-shadow:0 0 14px rgba(126,200,240,.4)}
+.mcard{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--card-r);overflow:hidden;margin-bottom:var(--sp-sm);
+  transition:box-shadow .2s;
+}
+.mcard:hover{box-shadow:0 4px 20px rgba(0,0,0,.07)}
+.mtop{
+  display:flex;align-items:center;gap:clamp(10px,1.5vw,16px);
+  padding:clamp(12px,1.8vw,16px) var(--card-px);
+  background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;flex-wrap:wrap;
+  position:relative;
+}
+/* vivid left-side accent strip — rotates through palette by month */
+.mtop::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:4px;border-radius:0 4px 4px 0;
+  background:var(--m-accent, var(--sky));
+}
+.mnum{font-family:'Fredoka One',cursive;font-size:clamp(24px,3.5vw,34px);font-weight:400;color:var(--lime);min-width:32px;line-height:1}
+.minfo{flex:1;min-width:120px}
+.mtitle{font-family:'Fredoka One',cursive;font-size:var(--fs-md);font-weight:400;color:var(--ink)}
+.mrange{font-size:var(--fs-xs);color:var(--ink3);margin-top:2px;font-weight:500}
+.mbadge{font-size:var(--fs-2xs);font-weight:600;padding:4px 12px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.b-cut{background:rgba(126,200,240,.14);color:var(--sky)}
+.b-plateau{background:rgba(255,217,61,.12);color:var(--warn)}
+.b-goal{background:rgba(200,241,53,.14);color:var(--lime)}
+.marrow{color:var(--ink3);font-size:16px;transition:transform .3s}
+.mcard.open .marrow{transform:rotate(180deg)}
+.mbody{display:none}
+.mcard.open .mbody{display:block}
+.msrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,45%),1fr));border-bottom:1px solid var(--border)}
+.mscell{padding:clamp(11px,1.6vw,15px) var(--card-px);border-right:1px solid var(--border)}
+.mscell:last-child{border-right:none}
+.mslbl{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-weight:600}
+.msval{font-family:'Fredoka One',cursive;font-size:clamp(15px,2.2vw,20px);font-weight:400;line-height:1;color:var(--ink)}
+.mssub{font-size:var(--fs-2xs);color:var(--ink3);margin-top:3px;font-weight:500}
+.mstrip{display:flex;height:5px;border-radius:99px;overflow:hidden;margin-top:7px}
+.mp{background:var(--pink)}.mc{background:var(--sky)}.mf{background:var(--warn)}
+.look-row{
+  display:grid;grid-template-columns:clamp(80px,11vw,105px) 1fr;
+  gap:clamp(14px,2.2vw,22px);padding:var(--card-py) var(--card-px);
+  border-bottom:1px solid var(--border);align-items:center;
+}
+.look-fig{
+  background:var(--surface2);
+  border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 8px 4px;
+  border:1.5px solid var(--border2);
+  min-height:90px;
+}
+/* Month plan icon grid — cohesive icon system */
+.m-icon-row{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(clamp(100px,13vw,150px), 1fr));
-  gap:clamp(7px,1vw,12px);
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  border-bottom:1px solid var(--border);
 }
-.wc {
-  background:var(--s3); border:1px solid var(--border);
-  border-radius:clamp(8px,1.2vw,12px);
-  padding:clamp(10px,1.5vw,14px) clamp(10px,1.4vw,13px);
-  position:relative; transition:border-color .25s,box-shadow .25s;
+.m-icon-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:clamp(16px,2.2vw,22px) clamp(10px,1.5vw,14px);
+  gap:6px;
+  border-right:1px solid var(--border);
+  position:relative;
 }
-.wc.logged  { border-color:var(--blue);     background:rgba(58,111,216,.06) }
-.wc.current { border-color:var(--green-lt); background:rgba(26,122,69,.07); box-shadow:0 0 14px rgba(26,122,69,.12) }
-.wc.future  { opacity:.3; pointer-events:none }
-.wc-dot  { position:absolute; top:9px; left:9px; width:6px; height:6px; border-radius:50% }
-.wc-num  { font-size:var(--fs-2xs); color:var(--sub); letter-spacing:.08em; text-transform:uppercase; margin-bottom:2px; padding-left:14px; font-weight:500 }
-.wc-date { font-size:var(--fs-2xs); color:var(--blue-lt); margin-bottom:5px; padding-left:14px; opacity:.8 }
-.wc-inp-wrap { position:relative }
-.wc-inp {
-  width:100%; background:transparent; border:none;
-  border-bottom:1px solid var(--border2);
-  color:#fff; font-family:'JetBrains Mono',monospace;
-  font-size:clamp(14px,2.2vw,20px); font-weight:500;
-  padding:2px 24px 2px 0; outline:none; transition:border-color .2s;
+.m-icon-cell:last-child{border-right:none}
+.m-icon-cell{background:var(--surface)}
+.m-icon-block{
+  width:clamp(44px,6vw,56px);
+  height:clamp(44px,6vw,56px);
+  border-radius:clamp(12px,1.8vw,16px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(18px,2.4vw,24px);
+  flex-shrink:0;
 }
-.wc-inp:focus { border-bottom-color:var(--blue) }
-.wc-inp::placeholder { color:var(--muted); font-size:clamp(11px,1.8vw,16px) }
-.wc-unit { position:absolute; right:0; top:4px; font-size:var(--fs-2xs); color:var(--sub); pointer-events:none }
-.wc-delta { font-size:var(--fs-xs); margin-top:5px }
-.wc-proj  { font-size:var(--fs-2xs); color:var(--sub); margin-top:2px }
-.wc-info  { font-size:var(--fs-2xs); color:var(--blue-lt); margin-top:2px }
-.wc-del {
-  display:none; position:absolute; top:7px; right:7px;
-  width:clamp(16px,2.2vw,20px); height:clamp(16px,2.2vw,20px);
-  border-radius:50%; background:rgba(232,64,48,.15); border:1px solid rgba(232,64,48,.3);
-  color:#ff8070; font-size:10px; font-weight:700;
-  align-items:center; justify-content:center; line-height:1; transition:background .15s;
-}
-.wc-del:hover { background:rgba(232,64,48,.4) }
-.wc.logged .wc-del { display:flex }
-@keyframes flashSave { 0%{background:rgba(26,122,69,.3)} 100%{background:rgba(58,111,216,.06)} }
-.wc.flash { animation:flashSave .5s ease }
-
-/* ─── TIMELINE ─── */
-.timeline { position:relative }
-.timeline::before {
-  content:''; position:absolute; left:clamp(20px,3vw,28px); top:0; bottom:0;
-  width:1px; background:linear-gradient(180deg,var(--blue) 0%,var(--border) 100%);
-}
-.mblock { position:relative; padding-left:clamp(48px,7vw,72px); margin-bottom:4px }
-.mdot {
-  position:absolute; left:clamp(12px,2vw,18px); top:18px;
-  width:clamp(14px,2vw,18px); height:clamp(14px,2vw,18px); border-radius:50%;
-  background:var(--s2); border:2px solid var(--border2);
-  display:flex; align-items:center; justify-content:center;
-  font-size:7px; color:var(--sub); z-index:1; transition:all .3s;
-}
-.mblock.mb-done .mdot { background:var(--green); border-color:var(--green); box-shadow:0 0 10px rgba(26,122,69,.3) }
-.mblock.mb-cur  .mdot { background:var(--blue);  border-color:var(--blue);  box-shadow:0 0 12px rgba(58,111,216,.3) }
-.mcard { background:var(--s2); border:1px solid var(--border); border-radius:var(--card-r); overflow:hidden; margin-bottom:var(--sp-sm); transition:border-color .2s }
-.mcard:hover { border-color:var(--border2) }
-.mtop {
-  display:flex; align-items:center; gap:clamp(8px,1.2vw,14px);
-  padding:clamp(10px,1.6vw,14px) var(--card-px);
-  background:rgba(255,255,255,.02); border-bottom:1px solid var(--border);
-  cursor:pointer; user-select:none; flex-wrap:wrap;
-}
-.mnum { font-family:'Noto Serif',serif; font-size:clamp(22px,3.5vw,32px); font-weight:700; color:var(--blue-lt); min-width:32px; line-height:1 }
-.minfo { flex:1; min-width:120px }
-.mtitle { font-family:'Noto Serif',serif; font-size:var(--fs-md); font-weight:600; color:#fff }
-.mrange { font-size:var(--fs-xs); color:var(--sub); margin-top:2px }
-.mbadge {
-  font-size:var(--fs-2xs); font-weight:500;
-  padding:clamp(2px,0.4vw,4px) clamp(7px,1.1vw,10px);
-  border-radius:100px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;
-}
-.b-cut     { background:rgba(58,111,216,.12);  color:var(--blue-lt); border:1px solid rgba(58,111,216,.28) }
-.b-plateau { background:rgba(240,184,48,.1);   color:var(--yellow);  border:1px solid rgba(240,184,48,.25) }
-.b-goal    { background:rgba(26,122,69,.12);   color:var(--green-lt);border:1px solid rgba(26,122,69,.28) }
-.marrow { color:var(--sub); font-size:15px; transition:transform .3s }
-.mcard.open .marrow { transform:rotate(180deg) }
-.mbody { display:none }
-.mcard.open .mbody { display:block }
-.msrow { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(130px,45%),1fr)); border-bottom:1px solid var(--border) }
-.mscell { padding:clamp(10px,1.5vw,14px) var(--card-px); border-right:1px solid var(--border) }
-.mscell:last-child { border-right:none }
-.mslbl { font-size:var(--fs-2xs); color:var(--sub); text-transform:uppercase; letter-spacing:.1em; margin-bottom:4px }
-.msval { font-family:'Noto Serif',serif; font-size:clamp(14px,2vw,18px); font-weight:600; line-height:1 }
-.mssub { font-size:var(--fs-2xs); color:var(--sub); margin-top:3px }
-.mstrip { display:flex; height:4px; border-radius:99px; overflow:hidden; margin-top:6px }
-.mp { background:var(--pink) }
-.mc { background:var(--blue-lt) }
-.mf { background:var(--yellow) }
-.look-row {
-  display:grid; grid-template-columns:clamp(56px,8vw,82px) 1fr;
-  gap:clamp(12px,2vw,20px); padding:var(--card-py) var(--card-px);
-  border-bottom:1px solid var(--border); align-items:center;
-}
-.look-text { font-size:var(--fs-xs); color:var(--sub); line-height:1.7 }
-.look-text strong { color:var(--text); font-family:'Noto Serif',serif; font-weight:600; display:block; margin-bottom:3px; font-size:var(--fs-sm) }
-.mwrow { padding:var(--card-py) var(--card-px); border-bottom:1px solid var(--border) }
-.mwlbl { font-size:var(--fs-2xs); color:var(--sub); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px }
-.mwgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(clamp(80px,12vw,110px),1fr)); gap:var(--sp-xs) }
-.mwitem { background:var(--s3); border:1px solid var(--border); border-radius:clamp(6px,1vw,9px); padding:clamp(7px,1.2vw,11px) clamp(8px,1.3vw,12px) }
-.mwact  { border-color:var(--blue); background:rgba(58,111,216,.06) }
-.mwnum   { font-size:var(--fs-2xs); color:var(--sub); margin-bottom:2px }
-.mwdate  { font-size:var(--fs-2xs); color:var(--blue-lt); margin-bottom:3px; opacity:.8 }
-.mwkg    { font-family:'Noto Serif',serif; font-size:var(--fs-sm); font-weight:600; color:#fff }
-.mwdelta { font-size:var(--fs-2xs); margin-top:2px }
-.mwbadge { font-size:var(--fs-2xs); color:var(--sub); margin-top:2px }
-.trow  { padding:var(--card-py) var(--card-px) }
-.tlbl  { font-size:var(--fs-2xs); color:var(--sub); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px }
-.tchips { display:flex; flex-wrap:wrap; gap:clamp(4px,0.7vw,7px) }
-.tchip {
-  background:rgba(126,176,232,.07); border:1px solid rgba(126,176,232,.2);
-  border-radius:clamp(5px,0.8vw,8px); padding:clamp(4px,0.7vw,6px) clamp(8px,1.2vw,11px);
-  font-size:var(--fs-xs); color:var(--blue-lt); line-height:1.45;
+.m-icon-label{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.09em;font-weight:600;text-align:center}
+.m-icon-value{font-family:'Fredoka One',cursive;font-size:clamp(16px,2.2vw,22px);color:var(--ink);line-height:1;text-align:center}
+.m-icon-sub{font-size:var(--fs-2xs);color:var(--ink3);margin-top:1px;font-weight:500;text-align:center}
+/* Icon accent colours */
+.ic-lime{background:rgba(200,241,53,.15);color:var(--lime)}
+.ic-sky  {background:var(--sky)}
+.ic-warn {background:var(--amber)}
+.ic-lime {background:var(--lime)}
+.ic-pink {background:var(--pink)}
+.ic-sky  svg path,.ic-sky  svg rect,.ic-sky  svg circle,.ic-sky  svg ellipse{fill:var(--sky-dk)}
+.ic-warn svg path,.ic-warn svg rect,.ic-warn svg circle,.ic-warn svg ellipse{fill:var(--lime-dk)}
+.ic-lime svg path,.ic-lime svg rect,.ic-lime svg circle,.ic-lime svg ellipse{fill:var(--lime-dk)}
+.ic-pink svg path,.ic-pink svg rect,.ic-pink svg circle,.ic-pink svg ellipse{fill:var(--pink-dk)}
+.ic-warn{background:rgba(255,217,61,.15);color:var(--warn)}
+.ic-coral{background:rgba(255,107,91,.15);color:var(--danger)}
+.look-text{font-size:var(--fs-sm);color:var(--ink2);line-height:1.75}
+.look-text strong{color:var(--ink);font-family:'Fredoka One',cursive;font-weight:400;display:block;margin-bottom:5px;font-size:var(--fs-md)}
+.mwrow{padding:var(--card-py) var(--card-px);border-bottom:1px solid var(--border)}
+.mwlbl{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;font-weight:600}
+.mwgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(80px,12vw,110px),1fr));gap:var(--sp-xs)}
+.mwitem{background:var(--surface2);border:1px solid rgba(255,255,255,.07);border-radius:clamp(10px,1.5vw,14px);padding:clamp(8px,1.2vw,12px)}
+.mwact{border-color:var(--sky);background:rgba(126,200,240,.08)}
+.mwnum{font-size:var(--fs-2xs);color:var(--ink3);margin-bottom:2px;font-weight:600}
+.mwdate{font-size:var(--fs-2xs);color:var(--sky);margin-bottom:4px;font-weight:500}
+.mwkg{font-family:'Fredoka One',cursive;font-size:var(--fs-sm);font-weight:400;color:var(--ink)}
+.mwdelta{font-size:var(--fs-2xs);margin-top:2px;font-weight:600}
+.mwbadge{font-size:var(--fs-2xs);color:var(--ink3);margin-top:2px;font-weight:500}
+.trow{padding:var(--card-py) var(--card-px)}
+.tlbl{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;font-weight:600}
+.tchips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{
+  background:rgba(126,200,240,.08);border:1px solid rgba(126,200,240,.18);
+  border-radius:999px;padding:5px 12px;
+  font-size:var(--fs-xs);color:var(--sky);font-weight:500;
 }
 
-/* ─── TABLE ─── */
-.dt { width:100%; border-collapse:collapse }
-.dt th, .dt td {
-  padding:clamp(7px,1.1vw,11px) clamp(8px,1.3vw,13px);
-  text-align:left; border-bottom:1px solid var(--border);
-  font-size:var(--fs-xs);
-}
-.dt th {
-  font-size:var(--fs-2xs); color:var(--sub); text-transform:uppercase;
-  letter-spacing:.1em; background:var(--s3); position:sticky; top:0;
-}
-.dt tr:hover td { background:rgba(255,255,255,.015) }
-.dt .act  { color:var(--blue-lt); font-weight:500 }
-.dt .prj  { color:var(--sub) }
-.dt .pos  { color:var(--green-lt) }
-.dt .neg  { color:#ff8070 }
-.dt .warn { color:var(--yellow) }
-.dt .hit  { color:var(--blue-lt); font-weight:600 }
-.dt .row-now td { background:rgba(26,122,69,.04)!important }
+/* ── TABLES ── */
+.dt{width:100%;border-collapse:collapse;font-size:var(--fs-xs)}
+.dt th,.dt td{padding:clamp(8px,1.2vw,12px) clamp(10px,1.5vw,14px);text-align:left;border-bottom:1px solid var(--border)}
+.dt th{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;background:var(--surface2);position:sticky;top:0;font-weight:600;border-bottom:1px solid var(--border2)}
+.dt tr:hover td{background:rgba(255,255,255,.03)}
+.dt .act{color:var(--sky);font-weight:600}
+.dt .prj{color:var(--ink3)}
+.dt .pos{color:var(--lime);font-weight:600}
+.dt .neg{color:var(--danger);font-weight:600}
+.dt .warn{color:var(--warn);font-weight:600}
+.dt .hit{color:var(--blob-red);font-family:'Fredoka One',cursive;font-size:var(--fs-md)}
+.dt .row-now td{background:rgba(200,241,53,.05)!important}
 
-/* ─── PROGRESS RINGS ─── */
-.rgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr)); gap:var(--sp-sm) }
-.rcard { background:var(--s2); border:1px solid var(--border); border-radius:var(--card-r); padding:var(--card-py) var(--card-px) }
-.rcard h3 { font-family:'Noto Serif',serif; font-size:var(--fs-sm); font-weight:600; color:#fff; margin-bottom:var(--sp-sm) }
-.rwrap { display:flex; align-items:center; gap:clamp(12px,2vw,20px) }
-.ring { position:relative; width:clamp(56px,8vw,72px); height:clamp(56px,8vw,72px); flex-shrink:0 }
-.ring svg { transform:rotate(-90deg); width:100%; height:100% }
-.rlabel { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center }
-.rlabel .rv { font-family:'Noto Serif',serif; font-size:clamp(11px,1.6vw,14px); font-weight:700 }
-.rlabel .rl { font-size:var(--fs-2xs); color:var(--sub); margin-top:1px }
-.msi { display:flex; align-items:center; gap:clamp(10px,1.5vw,16px); padding:clamp(8px,1.2vw,12px) 0; border-bottom:1px solid var(--border) }
-.msi:last-child { border-bottom:none }
-.mchk {
-  width:clamp(14px,2vw,18px); height:clamp(14px,2vw,18px); border-radius:4px;
-  border:2px solid var(--border2); cursor:pointer; transition:all .2s;
-  flex-shrink:0; display:flex; align-items:center; justify-content:center;
-  font-size:10px; font-weight:700; color:#fff;
+/* ── PROGRESS RINGS ── */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:var(--sp-sm)}
+.rcard{
+  background:var(--surface);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--card-r);padding:var(--card-py) var(--card-px);
 }
-.mchk.auto-done { background:var(--green); border-color:var(--green) }
-.mchk.checked   { background:var(--blue);  border-color:var(--blue) }
+.rcard h3{font-family:'Fredoka One',cursive;font-size:var(--fs-md);font-weight:400;color:var(--ink);margin-bottom:var(--sp-sm)}
+.rwrap{display:flex;align-items:center;gap:clamp(12px,2.5vw,22px)}
+.ring{position:relative;width:clamp(60px,9vw,80px);height:clamp(60px,9vw,80px);flex-shrink:0}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%}
+.rlabel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rlabel .rv{font-family:'Fredoka One',cursive;font-size:clamp(12px,1.8vw,16px);font-weight:400}
+.rlabel .rl{font-size:var(--fs-2xs);color:var(--ink3);margin-top:1px;font-weight:500}
+.msi{display:flex;align-items:center;gap:clamp(10px,1.8vw,16px);padding:clamp(9px,1.4vw,13px) 0;border-bottom:1px solid var(--border)}
+.msi:last-child{border-bottom:none}
+.mchk{
+  width:clamp(16px,2.2vw,20px);height:clamp(16px,2.2vw,20px);border-radius:6px;
+  border:2px solid var(--border2);cursor:pointer;transition:all .2s;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+}
+.mchk.auto-done{background:var(--lime);border-color:var(--lime);color:#0A0C0E}
+.mchk.checked{background:var(--sky);border-color:var(--sky);color:#0A0C0E}
 
-/* ─── SCIENCE ─── */
-.sci-card { margin-bottom:var(--sp-sm) }
-.sci-body {
-  font-family:'Roboto',sans-serif;
-  font-size:var(--fs-xs); color:var(--sub); line-height:1.8;
-}
-.sci-refs {
-  margin-top:var(--sp-sm); padding-top:var(--sp-xs);
-  border-top:1px solid var(--border);
-  display:flex; flex-wrap:wrap; gap:var(--sp-xs);
-}
-.sci-ref-tag {
+/* ── SCIENCE CARDS ── */
+.sci-card{margin-bottom:var(--sp-sm)}
+.sci-body{font-size:var(--fs-sm);color:var(--ink2);line-height:1.85}
+.sci-refs{margin-top:var(--sp-sm);padding-top:var(--sp-xs);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:var(--sp-xs)}
+.sci-ref-tag{
   font-size:var(--fs-2xs);
-  background:rgba(58,111,216,.08); border:1px solid rgba(58,111,216,.2);
-  color:var(--blue-lt); padding:clamp(2px,0.5vw,4px) clamp(6px,1vw,10px);
-  border-radius:5px; text-decoration:none; transition:background .2s;
+  background:rgba(126,200,240,.08);border:1px solid rgba(126,200,240,.2);
+  color:var(--sky);padding:4px 10px;border-radius:999px;text-decoration:none;
+  font-weight:500;transition:background .2s;
 }
-.sci-ref-tag:hover { background:rgba(58,111,216,.2) }
+.sci-ref-tag:hover{background:rgba(126,200,240,.2)}
 
-/* ─── MACRO STRIP ─── */
-.macstrip { display:flex; height:clamp(7px,1.1vw,10px); border-radius:5px; overflow:hidden }
+/* ── MACRO STRIP ── */
+.macstrip{display:flex;height:clamp(8px,1.2vw,12px);border-radius:999px;overflow:hidden}
 
-/* ─── BREAKPOINT TWEAKS ─── */
-/* Large screens — give cards more room */
-@media (min-width:1200px) {
-  :root {
-    --panel-px: clamp(40px,4vw,60px);
-    --card-px:  clamp(24px,2.5vw,32px);
-    --card-py:  clamp(18px,2vw,24px);
-  }
-  .wgrid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)) }
+/* ── RESPONSIVE BREAKPOINTS ── */
+@media(min-width:1200px){
+  :root{--px:clamp(48px,5vw,72px);--card-px:clamp(24px,2.5vw,32px)}
+  .wgrid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
 }
-
-/* Tablet */
-@media (max-width:768px) {
-  .msrow { grid-template-columns:1fr 1fr }
-  .mscell:nth-child(even) { border-right:none }
-  .mscell:nth-child(3),.mscell:nth-child(4) { border-top:1px solid var(--border) }
-  .look-row { grid-template-columns:56px 1fr }
-  .g4s { grid-template-columns:1fr 1fr }
+@media(max-width:768px){
+  .msrow{grid-template-columns:1fr 1fr}
+  .mscell:nth-child(even){border-right:none}
+  .mscell:nth-child(3),.mscell:nth-child(4){border-top:1px solid var(--border)}
+  .look-row{grid-template-columns:60px 1fr}
+  .g4s{grid-template-columns:1fr 1fr}
+  .hero h1{white-space:normal}
 }
-
-/* Mobile */
-@media (max-width:480px) {
-  .mtop { flex-wrap:wrap }
-  .mbadge { order:3; width:100% }
-  .card-head { flex-direction:column; align-items:flex-start }
-  .save-bar { flex-direction:column }
-  .save-bar-right { width:100%; justify-content:flex-end }
-  .mblock { padding-left:44px }
-  .timeline::before { left:18px }
-  .mdot { left:11px }
-  .wc-del { width:16px; height:16px; font-size:9px }
+@media(max-width:480px){
+  .card-head{flex-direction:column;align-items:flex-start}
+  .save-bar{flex-direction:column}
+  .save-bar-right{width:100%;justify-content:flex-end}
+  .mblock{padding-left:44px}
+  .timeline::before{left:18px}
+  .mdot{left:11px;width:14px;height:14px}
+  .mtop{flex-wrap:wrap}
+  .hero h1{letter-spacing:-.02em}
 }
-
-/* Very small phones */
-@media (max-width:360px) {
-  .hero h1 { font-size:clamp(26px,10vw,36px) }
-  .tabs-outer { justify-content:flex-start }
-  .wgrid { grid-template-columns:1fr 1fr }
-  .g4s { grid-template-columns:1fr 1fr }
-  .look-row { grid-template-columns:1fr; text-align:center }
+@media(max-width:360px){
+  :root{--px:12px}
+  .hero h1{font-size:clamp(28px,10vw,38px)}
+  .tabs-outer{justify-content:flex-start}
+  .wgrid{grid-template-columns:1fr 1fr}
+  .g4s{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
 
+<!-- gradient background via body::after -->
+
 <!-- HERO -->
 <div class="hero">
-  <h1>RECOMP<br><em>TRACKER</em></h1>
+  <h1>RECOMP <span class="hl"><em>TRACKER</em></span></h1>
   <p class="hero-sub">94 KG → 77 KG &nbsp;·&nbsp; 6×/WEEK &nbsp;·&nbsp; 10–12K STEPS/DAY</p>
   <div class="hero-kpis">
-    <div class="hero-kpi"><div class="kv" id="hk-cw" style="color:var(--silver)">94.0</div><div class="kl">Current kg</div></div>
-    <div class="hero-kpi"><div class="kv" id="hk-lost" style="color:var(--green-lt)">0.0</div><div class="kl">kg Lost</div></div>
-    <div class="hero-kpi"><div class="kv" id="hk-rate" style="color:var(--blue-lt)">—</div><div class="kl">kg/wk avg</div></div>
-    <div class="hero-kpi"><div class="kv" id="hk-bf" style="color:var(--yellow)">28.0%</div><div class="kl">Body Fat %</div></div>
-    <div class="hero-kpi"><div class="kv" id="hk-eta" style="color:var(--pink)">~24 wks</div><div class="kl">ETA Goal</div></div>
+    <div class="kpill" style="--kpill-accent:var(--sky)"><div class="kpill-v" id="hk-cw" style="color:var(--sky)">94.0</div><div class="kpill-l">Current</div></div>
+    <div class="kpill"><div class="kpill-v" id="hk-lost" style="color:var(--lime)">0.0 kg</div><div class="kpill-l">Lost</div></div>
+    <div class="kpill"><div class="kpill-v" id="hk-rate" style="color:var(--sky)">—</div><div class="kpill-l">kg/wk</div></div>
+    <div class="kpill"><div class="kpill-v" id="hk-bf" style="color:var(--yellow)">28.0%</div><div class="kpill-l">Body Fat</div></div>
+    <div class="kpill"><div class="kpill-v" id="hk-eta" style="color:var(--pink)">~24 wks</div><div class="kpill-l">ETA Goal</div></div>
+    <div class="kpill" style="--kpill-accent:var(--ink3)"><div class="kpill-v" id="hk-wks" style="color:var(--ink2)">0/24</div><div class="kpill-l">Weeks</div></div>
   </div>
 </div>
 
-<!-- NAV — centred + draggable -->
-<div class="topnav"><div class="tabs-outer"><div class="tabs" id="tab-bar">
-  <button class="tab on"  data-panel="log"       onclick="goTab('log',this)">📋 Weekly Log</button>
-  <button class="tab"     data-panel="timeline"   onclick="goTab('timeline',this)">📅 Month Plan</button>
-  <button class="tab"     data-panel="dashboard"  onclick="goTab('dashboard',this)">📊 Dashboard</button>
-  <button class="tab"     data-panel="charts"     onclick="goTab('charts',this)">📈 Charts</button>
-  <button class="tab"     data-panel="macros"     onclick="goTab('macros',this)">🥩 Nutrition</button>
-  <button class="tab"     data-panel="rings"      onclick="goTab('rings',this)">🎯 Progress</button>
-  <button class="tab"     data-panel="science"    onclick="goTab('science',this)">🧬 Science</button>
-</div></div></div>
+<!-- NAV -->
+<div class="topnav">
+  <div class="tabs-outer">
+    <div class="tabs" id="tab-bar">
+      <button class="tab on"  data-panel="log"       onclick="goTab('log',this)">📋 Weekly Log</button>
+      <button class="tab"     data-panel="timeline"   onclick="goTab('timeline',this)">📅 Month Plan</button>
+      <button class="tab"     data-panel="dashboard"  onclick="goTab('dashboard',this)">📊 Dashboard</button>
+      <button class="tab"     data-panel="charts"     onclick="goTab('charts',this)">📈 Charts</button>
+      <button class="tab"     data-panel="macros"     onclick="goTab('macros',this)">🥩 Nutrition</button>
+      <button class="tab"     data-panel="rings"      onclick="goTab('rings',this)">🎯 Progress</button>
+      <button class="tab"     data-panel="science"    onclick="goTab('science',this)">🧬 Science</button>
+    </div>
+  </div>
+</div>
 
-<!-- LOG -->
+<!-- ════ LOG ════ -->
 <div id="panel-log" class="panel on">
-  <div class="stitle">Weekly Weight Log</div>
-
-  <!-- Save / Clear toolbar -->
+  <div class="slabel">Weekly Weight Log</div>
   <div class="save-bar">
     <div class="save-bar-left">
       <div class="save-indicator" id="save-dot"></div>
-      <span id="save-status" style="font-size:11px">No unsaved changes</span>
+      <span id="save-status">No unsaved changes</span>
       <span style="color:var(--border2)">·</span>
-      <span id="log-prog-txt" style="font-size:11px">0/24 weeks logged</span>
+      <span id="log-prog-txt">0/24 weeks logged</span>
     </div>
     <div class="save-bar-right">
-      <button class="btn btn-save"   onclick="saveData()"   title="Save to browser storage">💾 Save</button>
-      <button class="btn btn-export" onclick="exportCSV()"  title="Download as CSV">⬇ Export CSV</button>
-      <button class="btn btn-clear"  onclick="clearAll()"   title="Clear all entries">✕ Clear All</button>
+      <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
+      <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
     </div>
   </div>
-
   <div id="log-alert"></div>
-
   <div class="card">
     <div class="card-head">
-      <span class="card-title">Enter weight every Monday — after toilet, before food or water</span>
-      <span class="card-sub">Decimal values supported (e.g. 90.4)</span>
+      <span class="card-title">Enter weight every Monday morning</span>
+      <span class="card-sub">After toilet, before food · Decimals supported e.g. 90.4</span>
     </div>
     <div class="card-body">
-      <div class="pb" style="margin-bottom:14px"><div class="pbf" id="log-pb" style="background:linear-gradient(90deg,var(--blue),var(--green));width:0%"></div></div>
+      <div class="pb" style="margin-bottom:16px"><div class="pbf" id="log-pb" style="background:linear-gradient(90deg,var(--sky),var(--lime));width:0%"></div></div>
       <div class="wgrid" id="week-grid"></div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-head"><span class="card-title">⚡ Adaptive Recommendations</span><span class="sci-tag">updates with each entry</span></div>
-    <div class="card-body" id="adapt-body"><p style="font-size:11px;color:var(--sub)">Log 2+ weeks to unlock adaptive calorie & macro targets based on your actual rate of loss.</p></div>
+    <div class="card-body" id="adapt-body">
+      <p style="font-size:var(--fs-xs);color:var(--ink3)">Log 2+ weeks to unlock adaptive calorie &amp; macro targets based on your actual rate of loss.</p>
+    </div>
   </div>
 </div>
 
-<!-- TIMELINE -->
+<!-- ════ TIMELINE ════ -->
 <div id="panel-timeline" class="panel">
-  <div class="stitle">6-Month Transformation Plan</div>
-  <div id="tl-alert" style="margin-bottom:12px"></div>
+  <div class="slabel">Month-by-Month Plan</div>
+  <div id="tl-alert" style="margin-bottom:14px"></div>
   <div class="timeline" id="tl-root"></div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ════ DASHBOARD ════ -->
 <div id="panel-dashboard" class="panel">
-  <div class="stitle">Live Dashboard</div>
-  <div class="g4s" style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px">
-    <div class="g4c"><div class="bm" style="color:var(--silver)" id="db-cw">94.0</div><div class="bml">Current kg</div><div class="bms" id="db-cw-s">Start weight</div></div>
-    <div class="g4c"><div class="bm" style="color:var(--green-lt)" id="db-lost">0.0</div><div class="bml">kg Lost</div><div class="bms" id="db-lost-s">0% of 17 kg</div></div>
-    <div class="g4c"><div class="bm" style="color:var(--blue-lt)" id="db-rate">—</div><div class="bml">kg/wk avg</div><div class="bms" id="db-rate-s">3-week rolling avg</div></div>
-    <div class="g4c"><div class="bm" style="color:var(--yellow)" id="db-eta">Wk 24</div><div class="bml">ETA Goal</div><div class="bms" id="db-eta-s">Adaptive estimate</div></div>
+  <div class="slabel">Live Dashboard</div>
+  <div class="g4s" style="border-radius:var(--card-r);overflow:hidden;border:1px solid rgba(255,255,255,.07);margin-bottom:var(--sp-sm)">
+    <div class="g4c"><div class="bm" id="db-cw" style="color:var(--ink)">94.0</div><div class="bml">Current kg</div><div class="bms" id="db-cw-s">Start weight</div></div>
+    <div class="g4c"><div class="bm" id="db-lost" style="color:var(--ok)">0.0</div><div class="bml">kg Lost</div><div class="bms" id="db-lost-s">0% of goal</div></div>
+    <div class="g4c"><div class="bm" id="db-rate" style="color:var(--accent)">—</div><div class="bml">kg/wk avg</div><div class="bms" id="db-rate-s">3-week rolling</div></div>
+    <div class="g4c"><div class="bm" id="db-eta" style="color:var(--blob-red)">Wk 24</div><div class="bml">ETA Goal</div><div class="bms" id="db-eta-s">Adaptive estimate</div></div>
   </div>
   <div class="g2">
     <div class="card">
-      <div class="card-head"><span class="card-title">Body Fat % Estimate</span><span class="sci-tag">interpolation model</span></div>
+      <div class="card-head"><span class="card-title">Body Fat % Estimate</span><span class="sci-tag">interpolation</span></div>
       <div class="card-body">
-        <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:7px">
-          <div><div class="bm" style="color:var(--yellow)" id="db-bf">28.0%</div><div class="bml">Now</div></div>
-          <div style="padding-bottom:5px;color:var(--sub)">→</div>
-          <div><div style="font-family:'Noto Serif',serif;font-size:20px;font-weight:700;color:var(--green-lt)">16.5%</div><div class="bml">Goal</div></div>
+        <div style="display:flex;align-items:flex-end;gap:14px;margin-bottom:9px">
+          <div><div class="bm" id="db-bf" style="color:var(--warn)">28.0%</div><div class="bml">Now</div></div>
+          <div style="padding-bottom:5px;color:var(--ink3);font-size:var(--fs-md)">→</div>
+          <div><div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);font-weight:400;color:var(--ok)">16.5%</div><div class="bml">Goal</div></div>
         </div>
-        <div class="pb"><div class="pbf" id="bf-pb" style="background:linear-gradient(90deg,var(--yellow),var(--green));width:0%"></div></div>
-        <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:6px" id="bf-note">~0.1% drop per 0.3 kg fat lost</div>
+        <div class="pb"><div class="pbf" id="bf-pb" style="background:linear-gradient(90deg,var(--warn),var(--lime));width:0%"></div></div>
+        <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:7px;font-weight:500" id="bf-note">~0.1% drop per 0.3 kg fat lost</div>
       </div>
     </div>
     <div class="card">
       <div class="card-head"><span class="card-title">Adaptive TDEE</span><span class="sci-tag">Mifflin-St Jeor</span></div>
       <div class="card-body">
-        <div style="font-family:'Noto Serif',serif;font-size:30px;font-weight:700;color:#fff" id="db-tdee">2,750</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">kcal/day TDEE estimate</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);line-height:1.7">Recalculates weekly as you lose weight. At 77 kg TDEE ≈ <strong style="color:var(--text)">2,380 kcal</strong>.</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-2xl);font-weight:400;color:var(--ink)" id="db-tdee">2,750</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;font-weight:600">kcal/day estimated TDEE</div>
+        <div style="font-size:var(--fs-xs);color:var(--ink2);line-height:1.7">Recalculates every week as you lose weight. At 77 kg TDEE ≈ <strong>2,380 kcal</strong>.</div>
       </div>
     </div>
   </div>
   <div class="card">
     <div class="card-head"><span class="card-title">Journey to 77 kg</span><span id="db-sp"></span></div>
     <div class="card-body">
-      <div style="display:flex;justify-content:space-between;font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-bottom:5px">
-        <span>94 kg</span><span id="db-now-lbl" style="color:var(--blue-lt)"></span><span style="color:var(--green-lt)">77 kg goal</span>
+      <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--ink3);margin-bottom:6px;font-weight:500">
+        <span>94 kg start</span>
+        <span id="db-now-lbl" style="color:var(--accent);font-weight:600"></span>
+        <span style="color:var(--ok);font-weight:600">77 kg goal</span>
       </div>
-      <div class="pb" style="height:10px;border-radius:6px"><div class="pbf" id="goal-pb" style="background:linear-gradient(90deg,var(--blue),var(--green));width:0%;border-radius:6px"></div></div>
-      <div style="display:flex;justify-content:space-between;font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:7px">
+      <div class="pb" style="height:12px;border-radius:999px">
+        <div class="pbf" id="goal-pb" style="background:linear-gradient(90deg,var(--sky),var(--lime));width:0%;border-radius:999px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--ink3);margin-top:8px;font-weight:500">
         <span id="db-wkin">Week 0 of 24</span><span id="db-wkleft">24 weeks remaining</span>
       </div>
     </div>
@@ -628,96 +688,100 @@ button { font-family:inherit; cursor:pointer }
   </div>
 </div>
 
-<!-- CHARTS -->
+<!-- ════ CHARTS ════ -->
 <div id="panel-charts" class="panel">
-  <div class="stitle">Visual Projections</div>
+  <div class="slabel">Visual Projections</div>
   <div class="card">
     <div class="card-head"><span class="card-title">Weight Trajectory</span><span class="card-sub sci-tag">actual · plan · adaptive forecast</span></div>
-    <div style="padding:10px 8px 4px"><canvas id="ch-main" height="260"></canvas></div>
+    <div style="padding:12px 10px 6px"><canvas id="ch-main" height="260"></canvas></div>
   </div>
   <div class="card">
     <div class="card-head"><span class="card-title">Weekly Loss Rate (kg/wk)</span><span class="card-sub">Green zone = 0.5–1.0 kg/wk optimal</span></div>
-    <div style="padding:10px 8px 4px"><canvas id="ch-rate" height="200"></canvas></div>
+    <div style="padding:12px 10px 6px"><canvas id="ch-rate" height="200"></canvas></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="card-head"><span class="card-title">Body Fat % Over Time</span></div><div style="padding:10px 8px 4px"><canvas id="ch-bf" height="210"></canvas></div></div>
-    <div class="card"><div class="card-head"><span class="card-title">Cumulative Fat Loss (kg)</span></div><div style="padding:10px 8px 4px"><canvas id="ch-cum" height="210"></canvas></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Body Fat % Trend</span></div><div style="padding:12px 10px 6px"><canvas id="ch-bf" height="210"></canvas></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">Cumulative Loss</span></div><div style="padding:12px 10px 6px"><canvas id="ch-cum" height="210"></canvas></div></div>
   </div>
 </div>
 
-<!-- MACROS -->
+<!-- ════ NUTRITION ════ -->
 <div id="panel-macros" class="panel">
-  <div class="stitle">Adaptive Nutrition</div>
+  <div class="slabel">Adaptive Nutrition</div>
   <div class="card">
-    <div class="card-head"><span class="card-title">Macro Targets — live, recalculates with logged weight</span><span class="sci-tag">science-based</span></div>
+    <div class="card-head"><span class="card-title">Live Macro Targets</span><span class="sci-tag">recalculates with your weight</span></div>
     <div class="card-body">
-      <div class="g3" id="macro-boxes" style="margin-bottom:13px"></div>
+      <div class="g3" id="macro-boxes" style="margin-bottom:14px"></div>
       <div class="macstrip" id="macro-strip"></div>
-      <div style="display:flex;gap:14px;margin-top:7px;font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub)">
-        <span><span style="color:var(--pink)">■</span> Protein</span>
-        <span><span style="color:var(--blue-lt)">■</span> Carbs</span>
-        <span><span style="color:var(--yellow)">■</span> Fat</span>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:var(--fs-xs);color:var(--ink3);font-weight:500">
+        <span><span style="color:var(--blob-pink)">■</span> Protein</span>
+        <span><span style="color:var(--accent)">■</span> Carbs</span>
+        <span><span style="color:var(--warn)">■</span> Fat</span>
       </div>
-      <div style="margin-top:11px;padding:11px;background:var(--s3);border-radius:9px;border:1px solid var(--border);font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);line-height:1.75" id="macro-note"></div>
+      <div style="margin-top:13px;padding:13px;background:var(--surface2);border-radius:14px;border:1px solid rgba(255,255,255,.07);font-size:var(--fs-xs);color:var(--ink2);line-height:1.8" id="macro-note"></div>
     </div>
   </div>
   <div class="g2">
     <div class="card">
       <div class="card-head"><span class="card-title">Why Protein is Non-Negotiable</span></div>
-      <div class="card-body" style="font-family:'Roboto',sans-serif;font-size:11px;color:var(--sub);line-height:1.75">
-        During a deficit, protein (1.8–2.4 g/kg) is the primary muscle-preservation lever (Morton et al., 2018 — 49-study meta-analysis). Thermic effect: 25–30% of calories burned just digesting it.
-        <br><br><strong style="color:var(--text)">Your target: <span id="prot-target" style="color:var(--blue-lt)">—</span></strong>
+      <div class="card-body" style="font-size:var(--fs-xs);color:var(--ink2);line-height:1.8">
+        During a deficit, protein (1.8–2.4 g/kg) is the primary muscle-preservation lever <em>(Morton et al., 2018 - 49-study meta-analysis)</em>. Thermic effect: 25–30% of calories burned digesting it.
+        <br><br><strong>Your target: <span id="prot-target" style="color:var(--accent)">—</span></strong>
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><span class="card-title">Training vs Rest Day Calories</span></div>
-      <div class="card-body" style="font-family:'Roboto',sans-serif;font-size:11px;color:var(--sub);line-height:1.75">
-        <strong style="color:#fff">Training (6 days):</strong> Full calorie target. Carbs fuel glycogen and performance.<br><br>
-        <strong style="color:#fff">Rest day (1 day):</strong> Reduce carbs by 150–200 kcal. Deepens weekly deficit without harming recovery.
+      <div class="card-head"><span class="card-title">Training vs Rest Day</span></div>
+      <div class="card-body" style="font-size:var(--fs-xs);color:var(--ink2);line-height:1.8">
+        <strong>Training (6 days):</strong> Full calorie target. Carbs fuel glycogen and performance.<br><br>
+        <strong>Rest day:</strong> Reduce carbs by 150–200 kcal. Deepens weekly deficit without harming recovery.
       </div>
     </div>
   </div>
   <div class="card">
     <div class="card-head"><span class="card-title">Meal Timing Protocol</span><span class="sci-tag">evidence-based</span></div>
-    <div class="card-body"><div id="meal-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px"></div></div>
+    <div class="card-body"><div id="meal-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,18vw,190px),1fr));gap:10px"></div></div>
   </div>
   <div class="card">
-    <div class="card-head"><span class="card-title">Supplement Stack — Evidence Grade</span></div>
-    <div class="card-body"><div id="supp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:9px"></div></div>
+    <div class="card-head"><span class="card-title">Supplement Stack</span><span class="sci-tag">evidence grade</span></div>
+    <div class="card-body"><div id="supp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(160px,20vw,210px),1fr));gap:10px"></div></div>
   </div>
 </div>
 
-<!-- RINGS -->
+<!-- ════ PROGRESS RINGS ════ -->
 <div id="panel-rings" class="panel">
-  <div class="stitle">Progress Rings</div>
+  <div class="slabel">Progress Rings</div>
   <div class="rgrid" id="ring-grid"></div>
-  <div class="stitle" style="margin-top:22px">Milestone Checklist</div>
+  <div class="slabel" style="margin-top:24px">Milestone Checklist</div>
   <div class="card"><div class="card-body" id="milestone-list"></div></div>
-  <div class="stitle" style="margin-top:8px">Phase Roadmap</div>
-  <div id="phase-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px"></div>
+  <div class="slabel" style="margin-top:16px">Phase Roadmap</div>
+  <div id="phase-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,16vw,160px),1fr));gap:10px"></div>
 </div>
 
-<!-- SCIENCE -->
+<!-- ════ SCIENCE ════ -->
 <div id="panel-science" class="panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
-    <div class="stitle" style="margin-bottom:0;flex:1">The Science Behind Your Plan</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span id="sci-freshness" style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub)">Static references</span>
-      <button class="btn btn-export" onclick="fetchLatestScience()" id="sci-refresh-btn" style="font-size:10px">🔄 Refresh Headlines</button>
-    </div>
-  </div>
-  <div id="science-news" style="margin-bottom:14px"></div>
+  <div class="slabel">The Science</div>
   <div id="science-content"></div>
 </div>
 
 <script>
+
 /* ════════════════════════════════════
    PROFILE + SCIENCE ENGINE
 ════════════════════════════════════ */
 const P={startKg:94,goalKg:77,heightCm:168,age:30,actMult:1.725,totalWeeks:24,startBF:28.0,goalBF:16.5};
 const bmr  = w => 10*w + 6.25*P.heightCm - 5*P.age + 5;
 const tdee = w => Math.round(bmr(w) * P.actMult);
-const planKg = w => +Math.max(P.goalKg, P.startKg - (P.startKg-P.goalKg)/P.totalWeeks*w).toFixed(1);
+// safe avgRate won't crash on first planKg call
+const _avgRateCache = {};
+const planKg = w => {
+  const rate=avgRate();
+  const ckg=currKg(),cwk=currWk();
+  if(rate&&rate>0&&cwk>0&&w>cwk){
+    return +Math.max(P.goalKg,ckg-rate*(w-cwk)).toFixed(1);
+  }
+  const wks=P.totalWeeks;
+  return +Math.max(P.goalKg,P.startKg-(P.startKg-P.goalKg)/wks*w).toFixed(1);
+};
 const estBF  = kg => { const p=Math.max(0,Math.min(1,(P.startKg-kg)/(P.startKg-P.goalKg))); return +(P.startBF-(P.startBF-P.goalBF)*p).toFixed(1); };
 
 /* Week → actual calendar date (Week 1 = Mon 11 May 2026) */
@@ -730,60 +794,95 @@ function weekDate(w) {
 
 /* Body SVG */
 function bodySVG(bf){
-  const sl=Math.max(0,Math.min(1,(bf-16)/14));
-  const wr=18+sl*10,cr=22+sl*4,hr=20+sl*5;
-  const col=bf<=18?'#6FB87A':bf<=22?'#7EB0E8':'#E84030';
-  return `<svg width="68" height="112" viewBox="0 0 68 112" fill="none">
-    <circle cx="34" cy="10" r="9" fill="${col}" opacity=".9"/>
-    <rect x="30" y="18" width="8" height="6" rx="3" fill="${col}" opacity=".7"/>
-    <path d="M${34-cr} 24 C${34-cr} 24 ${34-wr} 51 ${34-wr} 57 C${34-wr} 63 ${34-hr} 69 ${34-hr} 69 L${34+hr} 69 C${34+hr} 69 ${34+wr} 63 ${34+wr} 57 C${34+wr} 51 ${34+cr} 24 ${34+cr} 24 Z" fill="${col}" opacity=".8"/>
-    <path d="M${34-cr} 27 Q${34-cr-13} 43 ${34-cr-9} 61" stroke="${col}" stroke-width="7" stroke-linecap="round" fill="none" opacity=".7"/>
-    <path d="M${34+cr} 27 Q${34+cr+13} 43 ${34+cr+9} 61" stroke="${col}" stroke-width="7" stroke-linecap="round" fill="none" opacity=".7"/>
-    <path d="M${34-7} 69 Q${34-11} 90 ${34-9} 107" stroke="${col}" stroke-width="9" stroke-linecap="round" fill="none" opacity=".75"/>
-    <path d="M${34+7} 69 Q${34+11} 90 ${34+9} 107" stroke="${col}" stroke-width="9" stroke-linecap="round" fill="none" opacity=".75"/>
-  </svg>`;
+  /* Flat bold silhouette figures - Matisse cutout style.
+     Each pose reflects the physique stage: heavier/rounded early, athletic/dynamic later.
+     Monochrome #1A1814 on cream background, rounded organic forms. */
+  const ink='#E8EAF0';
+  const bg='var(--surface2)';
+
+  if(bf>=26){
+    // Stage 1: wide stance, full rounded form, arms out slightly
+    return `<svg width="88" height="96" viewBox="0 0 88 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="44" cy="11" rx="9" ry="10" fill="${ink}"/>
+      <path d="M28 22 Q20 26 16 38 Q14 48 18 52 Q24 48 30 46 L30 56 Q28 68 26 80 Q30 84 36 82 Q38 72 40 62 L44 62 L48 72 Q50 82 54 82 Q60 84 62 80 Q60 68 58 56 L58 46 Q64 48 70 52 Q74 48 72 38 Q68 26 60 22 Q54 18 44 18 Q34 18 28 22 Z" fill="${ink}"/>
+    </svg>`;
+  } else if(bf>=24){
+    // Stage 2: slight forward lean, one arm raised
+    return `<svg width="88" height="96" viewBox="0 0 88 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="42" cy="10" rx="8.5" ry="9.5" fill="${ink}"/>
+      <path d="M30 20 Q18 28 14 40 Q16 46 22 44 Q24 40 28 38 L28 58 Q26 70 24 82 Q28 86 34 83 Q38 72 40 60 L44 60 L48 72 Q52 84 58 83 Q64 86 62 80 Q60 68 60 56 L62 38 Q58 34 60 28 Q70 22 68 16 Q60 10 54 14 Q50 18 44 19 Q36 18 30 20 Z" fill="${ink}"/>
+    </svg>`;
+  } else if(bf>=22){
+    // Stage 3: wide power stance, arms out wide (strong pose)
+    return `<svg width="96" height="92" viewBox="0 0 96 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="48" cy="10" rx="8" ry="9" fill="${ink}"/>
+      <path d="M36 20 Q26 24 10 26 Q6 30 10 36 Q18 36 28 34 L28 54 Q24 68 22 82 Q26 86 32 84 Q36 72 40 58 L48 58 L56 72 Q60 84 66 84 Q72 86 70 82 Q68 66 68 54 L70 34 Q78 36 86 36 Q90 30 86 26 Q70 24 60 20 Q54 17 48 17 Q42 17 36 20 Z" fill="${ink}"/>
+    </svg>`;
+  } else if(bf>=20){
+    // Stage 4: dynamic action pose, one leg bent
+    return `<svg width="88" height="100" viewBox="0 0 88 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="46" cy="10" rx="8" ry="9" fill="${ink}"/>
+      <path d="M34 20 Q22 26 14 36 Q12 42 18 44 Q24 42 30 38 L32 58 Q28 72 24 84 Q30 88 36 85 Q40 74 42 62 L48 60 L54 74 Q60 88 66 86 Q72 90 68 84 Q66 70 66 56 Q72 48 76 42 Q76 36 70 34 Q62 36 56 40 L54 24 Q50 18 46 17 Q40 17 34 20 Z" fill="${ink}"/>
+    </svg>`;
+  } else if(bf>=18){
+    // Stage 5: warrior wide squat, arms raised (athletic)
+    return `<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="48" cy="9" rx="7.5" ry="8.5" fill="${ink}"/>
+      <path d="M38 18 Q28 20 20 16 Q14 16 12 22 Q14 28 22 28 Q28 26 34 28 L30 44 Q22 60 16 76 Q22 82 28 78 Q34 66 40 52 L48 52 L56 66 Q62 78 68 78 Q74 82 80 76 Q74 60 66 44 L62 28 Q68 26 74 28 Q82 28 84 22 Q82 16 76 16 Q68 20 58 18 Q54 16 48 16 Q42 16 38 18 Z" fill="${ink}"/>
+    </svg>`;
+  } else {
+    // Stage 6: triumphant star pose, goal reached
+    return `<svg width="100" height="96" viewBox="0 0 100 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="9" rx="7.5" ry="8.5" fill="${ink}"/>
+      <path d="M42 18 Q28 18 12 24 Q8 30 12 36 Q20 36 32 30 L38 50 Q30 66 24 84 Q30 88 36 85 Q42 70 46 56 L50 54 L54 68 Q60 84 66 85 Q72 88 78 84 Q72 66 64 50 L70 30 Q80 36 88 36 Q92 30 88 24 Q72 18 58 18 Q54 16 50 16 Q46 16 42 18 Z" fill="${ink}"/>
+    </svg>`;
+  }
 }
 
 /* ════════════════════════════════════
    MONTH DATA
 ════════════════════════════════════ */
+function mRange(ws,we){
+  const d1=weekDate(ws),d2=weekDate(we);
+  return `Weeks ${ws}–${we} · ${d1} – ${d2}`;
+}
 const MONTHS=[
-  {num:'01',title:'The Ignition',range:'Weeks 1–4 · May–Jun 2026',badge:'Active Cut',bc:'b-cut',
+  {num:'01',title:'The Ignition',range:mRange(1,4),badge:'Active Cut',bc:'b-cut',
    startW:94,endW:90.5,startBF:28,endBF:26.5,cal:2000,deficit:750,prot:155,carbs:188,fat:56,
-   desc:'Big water-weight drop in week 1 (2–3 kg fast). Glycogen depletion drives initial loss — real fat burning begins week 2. Face slims, belt loosens. Energy may dip mid-week as metabolism adapts.',
+   desc:'Big water-weight drop in week 1 (2–3 kg fast). Glycogen depletion drives initial loss. Real fat burning begins week 2. Face slims, belt loosens. Energy may dip mid-week as metabolism adapts.',
    body:'Soft abdomen, no visible muscle definition yet. Upper body shape improving with training.',
    weeks:[{w:1,pk:92.0},{w:2,pk:91.3},{w:3,pk:90.8},{w:4,pk:90.5}],
-   tips:['Weigh 3× per week, same conditions','Expect ±1–2 kg daily swings — use avg','Front-load protein at breakfast','3L water minimum daily']},
-  {num:'02',title:'Building Momentum',range:'Weeks 5–8 · Jun–Jul 2026',badge:'Active Cut',bc:'b-cut',
+   tips:['Weigh 3× per week, same conditions','Expect daily ±1-2 kg swings, use 3-week avg','Front-load protein at breakfast','3L water minimum daily']},
+  {num:'02',title:'Building Momentum',range:mRange(5,8),badge:'Active Cut',bc:'b-cut',
    startW:90.5,endW:87.5,startBF:26.5,endBF:24.5,cal:2000,deficit:720,prot:155,carbs:188,fat:56,
-   desc:'Water weight stabilises — real fat burning now dominant. Waist shrinking week by week. Lifts increasing. Sleep improving. Clothes fitting differently.',
+   desc:'Water weight stabilises. Real fat burning is now dominant. Waist shrinking week by week. Lifts increasing. Sleep improving. Clothes fitting differently.',
    body:'Waist thinning. Shoulders appear broader. Early V-taper forming.',
    weeks:[{w:5,pk:89.8},{w:6,pk:89.1},{w:7,pk:88.4},{w:8,pk:87.5}],
-   tips:['Add 2.5 kg when you hit top reps','Monthly progress photos in same lighting','Track waist — not just scale','5g creatine daily preserves strength']},
-  {num:'03',title:'The Grind',range:'Weeks 9–12 · Jul–Aug 2026',badge:'⚠ Plateau Risk',bc:'b-plateau',
+   tips:['Add 2.5 kg when you hit top reps','Monthly progress photos in same lighting','Track waist, not just scale','5g creatine daily preserves strength']},
+  {num:'03',title:'The Grind',range:mRange(9,12),badge:'⚠ Plateau Risk',bc:'b-plateau',
    startW:87.5,endW:84.5,startBF:24.5,endBF:22.5,cal:1950,deficit:760,prot:155,carbs:175,fat:54,
-   desc:'Scale may stall 1–2 weeks — metabolic adaptation. Do not slash calories. Add 20-min walks on rest days. Body is reshaping even when scale is quiet.',
+   desc:'Scale may stall 1-2 weeks due to metabolic adaptation. Do not slash calories. Add 20-min walks on rest days. Your body is reshaping even when the scale is quiet.',
    body:'Definition emerging in shoulders and arms. Belly reducing. Noticeably leaner face.',
    weeks:[{w:9,pk:86.9},{w:10,pk:86.3},{w:11,pk:85.6},{w:12,pk:84.5}],
-   tips:['Drop to 1,950 kcal to counter adaptation','Add 20-min walk if stalling 2+ weeks','Never skip legs — maximise fat burn','One refeed at TDEE per week is OK']},
-  {num:'04',title:'Visible Change',range:'Weeks 13–17 · Aug–Sep 2026',badge:'Active Cut',bc:'b-cut',
+   tips:['Drop to 1,950 kcal to counter adaptation','Add 20-min walk if stalling 2+ weeks','Never skip legs: maximise fat burn','One maintenance-calorie day per week is fine']},
+  {num:'04',title:'Visible Change',range:mRange(13,17),badge:'Active Cut',bc:'b-cut',
    startW:84.5,endW:81.5,startBF:22.5,endBF:20.0,cal:1950,deficit:760,prot:155,carbs:175,fat:54,
-   desc:'People start noticing. Jawline sharp, neck slim, shoulders visibly wider than waist. Entering visually "fit" territory. Gym confidence surges.',
+   desc:'People start noticing. Jawline sharp, neck slim, shoulders visibly wider than waist. You are entering visibly fit territory. Gym confidence surges.',
    body:'Clear V-taper. Upper abs beginning. Arms muscular. Face transformed vs month 1.',
    weeks:[{w:13,pk:83.8},{w:14,pk:83.1},{w:15,pk:82.5},{w:16,pk:81.9},{w:17,pk:81.5}],
-   tips:['1 refeed day/week at TDEE','Intensity up: drop sets, supersets','7–9h sleep — GH peaks in deep sleep','New clothes may be needed now 👕']},
-  {num:'05',title:'The Reveal',range:'Weeks 18–21 · Sep–Oct 2026',badge:'Active Cut',bc:'b-cut',
+   tips:['1 refeed day per week at maintenance calories','Intensity up: drop sets, supersets','7-9h sleep: GH peaks in deep sleep','New clothes may be needed now 👕']},
+  {num:'05',title:'The Reveal',range:mRange(18,21),badge:'Active Cut',bc:'b-cut',
    startW:81.5,endW:79.0,startBF:20.0,endBF:18.0,cal:1950,deficit:730,prot:160,carbs:170,fat:53,
-   desc:'At ~18% BF upper abs visible. Athletic physique forming. Energy stable. Bump protein to 160g to protect muscle as you get leaner.',
+   desc:'At around 18% body fat, upper abs become visible. Athletic physique forming. Energy is stable. Increase protein to 160g to protect muscle as you get leaner.',
    body:'Athletic and lean. Abs in good lighting. Clear muscle separation. Obliques emerging.',
    weeks:[{w:18,pk:80.9},{w:19,pk:80.2},{w:20,pk:79.6},{w:21,pk:79.0}],
-   tips:['Protein to 160g — critical at lower BF','Try carb cycling now','Deload every 6–8 weeks','Document your progress — earned it']},
-  {num:'06',title:'Goal Reached 🏆',range:'Weeks 22–24 · Oct–Nov 2026',badge:'🏆 Goal Hit',bc:'b-goal',
+   tips:['Protein to 160g: critical at lower body fat','Try carb cycling now','Deload every 6–8 weeks','Document your progress - earned it']},
+  {num:'06',title:'Goal Reached 🏆',range:mRange(22,24),badge:'🏆 Goal Hit',bc:'b-goal',
    startW:79.0,endW:77.0,startBF:18.0,endBF:16.5,cal:2200,deficit:0,prot:160,carbs:210,fat:64,
-   desc:'77 kg, ~16.5% BF — athletic, lean, strong. Reverse diet: +150 kcal/week to new TDEE (~2,380 kcal). Avoid fat rebound.',
+   desc:'77 kg, around 16.5% body fat: athletic, lean and strong. Reverse diet by adding +150 kcal per week back to your new TDEE of around 2,380 kcal. Avoid fat rebound.',
    body:'Full athletic physique. Visible abs, wide shoulders. 2+ clothing sizes down.',
    weeks:[{w:22,pk:78.4},{w:23,pk:77.7},{w:24,pk:77.0}],
-   tips:['Reverse diet: +150 kcal/week','Lean bulk: 200 kcal surplus max','New goal: +3–5 kg lean muscle','Celebrate — serious discipline built 🎉']},
+   tips:['Reverse diet: +150 kcal/week','Lean bulk: 200 kcal surplus max','New goal: +3–5 kg lean muscle','Celebrate - serious discipline built 🎉']},
 ];
 
 /* ════════════════════════════════════
@@ -814,9 +913,18 @@ function saveData() {
     const dot = document.getElementById('save-dot');
     const st  = document.getElementById('save-status');
     if(dot) { dot.classList.remove('saving'); dot.classList.add('saved'); }
-    if(st)  st.textContent = 'Saved ✓';
-    setTimeout(() => { if(!_dirty && st) st.textContent = 'No unsaved changes'; }, 2500);
-  } catch(e) { alert('Storage error. Try exporting as CSV.'); }
+    if(st)  { st.textContent = 'Saved ✓'; }
+    setTimeout(() => {
+      if(!_dirty) {
+        const s = document.getElementById('save-status');
+        if(s) s.textContent = 'All changes saved';
+        const d = document.getElementById('save-dot');
+        if(d) d.classList.add('saved');
+      }
+    }, 2500);
+  } catch(e) {
+    alert('Could not save to browser storage. Try exporting as CSV instead.');
+  }
 }
 
 function exportCSV() {
@@ -833,13 +941,35 @@ function exportCSV() {
 }
 
 function clearAll() {
-  const c = Object.keys(logs).length;
-  if(!c) return;
-  if(!confirm(`Clear all ${c} logged weeks? This cannot be undone.`)) return;
+  const count = Object.keys(logs).length;
+  if(!count) { alert('No weights logged yet.'); return; }
+  if(!confirm('Clear all ' + count + ' logged weeks? This cannot be undone.')) return;
+
+  // Wipe state + storage
   logs = {};
-  markDirty();
-  saveData();
-  buildLog(); refreshAll();
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY, '{}');
+  } catch(e) { console.warn('storage clear failed', e); }
+  _dirty = false;
+
+  // Reset P.totalWeeks to default since etaWks mutates it
+  P.totalWeeks = 24;
+
+  // UI feedback
+  const dot = document.getElementById('save-dot');
+  const st  = document.getElementById('save-status');
+  if(dot) { dot.classList.remove('saving'); dot.classList.add('saved'); }
+  if(st)  st.textContent = 'All weights cleared';
+  setTimeout(() => { if(st && !_dirty) st.textContent = 'No unsaved changes'; }, 2200);
+
+  // Force full rebuild of every panel
+  try { buildLog(); } catch(e) { console.error('buildLog', e); }
+  try { buildTimeline(); } catch(e) { console.error('buildTimeline', e); }
+  try { buildDashboard(); } catch(e) { console.error('buildDashboard', e); }
+  try { buildNutrition(); } catch(e) { console.error('buildNutrition', e); }
+  try { buildRings(); } catch(e) { console.error('buildRings', e); }
+  try { if(typeof buildCharts === 'function') buildCharts(); } catch(e) {}
 }
 
 // Helpers
@@ -855,7 +985,12 @@ const avgRate = (n=3) => {
   const sl=Math.min(n,ws.length), k=kgs.slice(-sl);
   return +((k[0]-k[k.length-1])/(sl-1)).toFixed(2);
 };
-const etaWks = (rate,ckg) => rate&&rate>0 ? Math.ceil((ckg-P.goalKg)/rate) : null;
+const etaWks = (rate,ckg) => {
+  if(!rate||rate<=0) return null;
+  const wl=Math.ceil((ckg-P.goalKg)/rate);
+  P.totalWeeks=currWk()+wl; // update dynamic total
+  return wl;
+};
 
 function isUnlocked(w) { return w===1 || logs[w-1]!==undefined; }
 function nextOpen() {
@@ -893,15 +1028,15 @@ function buildLog() {
     else if(isCurrent) cls += ' current';
     else if(isFuture)  cls += ' future';
 
-    const dc = delta===null ? '' : +delta<0 ? 'color:var(--green-lt)' : +delta>0 ? 'color:#ff8070' : 'color:var(--sub)';
+    const dc = delta===null ? '' : +delta<0 ? 'color:var(--ok)' : +delta>0 ? 'color:#ff8070' : 'color:var(--ink3)';
     const ds = delta!==null ? `${+delta>0?'+':''}${delta} kg` : '';
 
     let vsPlan = '';
     if(isLogged) {
       const d = (logs[w]-proj).toFixed(1);
       vsPlan = +d<=0
-        ? `<div class="wc-info" style="color:var(--green-lt)">▼ ${Math.abs(d)} ahead</div>`
-        : `<div class="wc-info" style="color:var(--yellow)">▲ +${d} behind</div>`;
+        ? `<div class="wc-info" style="color:var(--ok)">▼ ${Math.abs(d)} ahead</div>`
+        : `<div class="wc-info" style="color:var(--warn)">▲ +${d} behind</div>`;
     }
 
     grid.innerHTML += `
@@ -968,143 +1103,651 @@ function deleteLog(w) {
 function buildLogAlert() {
   const rate=avgRate(); let html='';
   if(rate===null)          html=`<div class="alert al-b">📋 Weigh every Monday morning (after toilet, before eating). Log 2+ weeks to unlock adaptive recommendations.</div>`;
-  else if(rate>=0.5&&rate<=1.0) html=`<div class="alert al-g">✅ <strong>On Track</strong> — ${rate} kg/wk (3-wk avg). Optimal recomp zone. Maintain current calories and training.</div>`;
-  else if(rate<0)          html=`<div class="alert al-r">⚠️ <strong>Gaining (+${Math.abs(rate)} kg/wk)</strong> — In a surplus. Audit liquid calories, oils, sauces. Reduce 200–300 kcal/day.</div>`;
-  else if(rate<0.3)        html=`<div class="alert al-y">⚠️ <strong>Very Slow (${rate} kg/wk)</strong> — Below minimum. Reduce 100–150 kcal or add 20-min walks.</div>`;
-  else if(rate<0.5)        html=`<div class="alert al-y">📉 <strong>Slightly Slow (${rate} kg/wk)</strong> — Trim 50–100 kcal or add 10 min walking.</div>`;
-  else                     html=`<div class="alert al-o">⚡ <strong>Losing Fast (${rate} kg/wk)</strong> — Above 1.0 kg/wk risks muscle. Add 100–150 kcal/day.</div>`;
+  else if(rate>=0.5&&rate<=1.0) html=`<div class="alert al-g">✅ <strong>On Track</strong> - ${rate} kg/wk (3-wk avg). Optimal recomp zone. Maintain current calories and training.</div>`;
+  else if(rate<0)          html=`<div class="alert al-r">⚠️ <strong>Gaining (+${Math.abs(rate)} kg/wk)</strong> - In a surplus. Audit liquid calories, oils, sauces. Reduce 200–300 kcal/day.</div>`;
+  else if(rate<0.3)        html=`<div class="alert al-y">⚠️ <strong>Very Slow (${rate} kg/wk)</strong> - Below minimum. Reduce 100–150 kcal or add 20-min walks.</div>`;
+  else if(rate<0.5)        html=`<div class="alert al-y">📉 <strong>Slightly Slow (${rate} kg/wk)</strong> - Trim 50–100 kcal or add 10 min walking.</div>`;
+  else                     html=`<div class="alert al-o">⚡ <strong>Losing Fast (${rate} kg/wk)</strong> - Above 1.0 kg/wk risks muscle. Add 100–150 kcal/day.</div>`;
   document.getElementById('log-alert').innerHTML=html;
 }
 
 function buildAdapt() {
-  const {ws,kgs}=logArr(); const body=document.getElementById('adapt-body');
-  if(ws.length<2){body.innerHTML=`<p style="font-size:11px;font-family:'Roboto',sans-serif;color:var(--sub)">Log at least 2 weeks to unlock recommendations.</p>`;return}
-  const rate=avgRate(),ckg=currKg();
-  const myTDEE=tdee(ckg),def=Math.round(0.7*7700/7),recCal=Math.max(1500,myTDEE-def);
-  const prot=Math.round(ckg*2.0),fat=Math.round(ckg*0.7),carbs=Math.max(50,Math.round((recCal-prot*4-fat*9)/4));
-  const eta=etaWks(rate,ckg);
+  const {ws,kgs}=logArr();
+  const body=document.getElementById('adapt-body');
+  if(ws.length<2){
+    body.innerHTML=`<p style="font-size:var(--fs-xs);color:var(--ink3);padding:8px 0">Log at least 2 weeks to unlock your personalised projection and recommendations.</p>`;
+    return;
+  }
+
+  const rate=avgRate();
+  const ckg=currKg();
+  const cwk=currWk();
+  const myTDEE=tdee(ckg);
+  const def=Math.round(0.7*7700/7);
+  const recCal=Math.max(1500,myTDEE-def);
+  const prot=Math.round(ckg*2.0);
+  const fat=Math.round(ckg*0.7);
+  const carbs=Math.max(50,Math.round((recCal-prot*4-fat*9)/4));
+  const eta=rate&&rate>0 ? Math.ceil((ckg-P.goalKg)/rate) : null;
+
+  // ── Phase classification ──
+  let phase='cutting', phaseCol='var(--sky)', phaseDesc='';
+  let rateLabel='', rateTip='';
+  if(rate===null||rate===undefined){
+    phase='unknown'; phaseCol='var(--ink3)';
+  } else if(rate<0){
+    phase='gaining'; phaseCol='var(--danger)';
+    rateLabel='Weight is going UP';
+    rateTip='You are in a caloric surplus. Audit hidden calories — oils, sauces, drinks. Reduce intake by 200-300 kcal/day.';
+  } else if(rate<0.2){
+    phase='plateau'; phaseCol='var(--warn)';
+    rateLabel='Plateau detected';
+    rateTip='Loss has stalled. Body has adapted. Options: reduce calories by 100-150 kcal, add 20 min walking on rest days, or try a brief refeed at maintenance for 1-2 days.';
+  } else if(rate<0.5){
+    phase='slow cut'; phaseCol='var(--blob-yel)';
+    rateLabel='Slow but steady';
+    rateTip='Below optimal (0.5-1.0 kg/wk). Reduce by 50-100 kcal or add a short walk. Muscle risk is low at this rate.';
+  } else if(rate<=1.0){
+    phase='optimal cut'; phaseCol='var(--lime)';
+    rateLabel='Optimal zone';
+    rateTip='0.5-1.0 kg/wk is the science-backed sweet spot: maximum fat loss with minimum muscle loss. Keep current intake.';
+  } else {
+    phase='fast cut'; phaseCol='var(--danger)';
+    rateLabel='Losing too fast';
+    rateTip='Above 1 kg/wk risks losing lean muscle. Add 100-150 kcal/day from protein and complex carbs. Prioritise sleep.';
+  }
+
+  // ── Projection scenarios ──
+  // Build 3 scenario timelines from current position
+  function scenarioETA(scenarioRate){
+    if(!scenarioRate||scenarioRate<=0) return null;
+    const wksLeft=Math.ceil((ckg-P.goalKg)/scenarioRate);
+    const goalWk=cwk+wksLeft;
+    const d=new Date('2026-05-11');
+    d.setDate(d.getDate()+(goalWk-1)*7);
+    return {
+      wks: wksLeft,
+      date: d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      finalWk: goalWk,
+      kgPerWk: scenarioRate,
+    };
+  }
+
+  const scenarios=[
+    {
+      label:'Plateau (current stall)',
+      rate: phase==='plateau' ? (rate||0) : Math.min(rate||0.3, 0.15),
+      col:'var(--warn)',
+      icon:'⚠',
+      note:'If progress stalls for 2+ weeks with no adjustment',
+    },
+    {
+      label:'Current pace',
+      rate: rate||0.5,
+      col:'var(--accent)',
+      icon:'📍',
+      note:'Based on your last '+Math.min(ws.length,3)+'-week average',
+    },
+    {
+      label:'Optimal cut',
+      rate: 0.75,
+      col:'var(--ok)',
+      icon:'🎯',
+      note:'Target: 0.75 kg/wk with tight deficit and 155g+ protein',
+    },
+  ];
+
+  // ── Mini weight trajectory — next 8 projected weeks ──
+  const projWks=[];
+  for(let i=1;i<=8;i++){
+    const wkNum=cwk+i;
+    const projKg=Math.max(P.goalKg, ckg-(rate||0.5)*i).toFixed(1);
+    const d=new Date('2026-05-11');
+    d.setDate(d.getDate()+(wkNum-1)*7);
+    const dateStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    projWks.push({w:wkNum, kg:+projKg, date:dateStr});
+  }
+
+  // ── SVG sparkline of projection ──
+  function sparkline(scenarios, ckg){
+    const W=280, H=80, pad=12, weeks=16;
+    const minKg=P.goalKg-1, maxKg=ckg+1;
+    const xScale=(W-pad*2)/weeks;
+    const yScale=(H-pad*2)/(maxKg-minKg);
+    const toX=i=>(pad+i*xScale).toFixed(1);
+    const toY=kg=>(H-pad-(kg-minKg)*yScale).toFixed(1);
+
+    let paths='';
+    const scenCols=['var(--warn)','var(--accent)','var(--ok)'];
+    const scenRates=[
+      phase==='plateau'?(rate||0):Math.min(rate||0.3,0.15),
+      rate||0.5,
+      0.75
+    ];
+    scenRates.forEach((r,si)=>{
+      let d=`M ${toX(0)} ${toY(ckg)}`;
+      for(let i=1;i<=weeks;i++){
+        const kg=Math.max(P.goalKg, ckg-r*i);
+        d+=` L ${toX(i)} ${toY(kg)}`;
+      }
+      // dashed for plateau, solid for others
+      const dash=si===0?'stroke-dasharray="4 3"':'';
+      paths+=`<path d="${d}" stroke="${scenCols[si]}" stroke-width="${si===1?2.5:1.8}" fill="none" stroke-linecap="round" ${dash} opacity="${si===1?1:.75}"/>`;
+    });
+
+    // Goal line
+    paths+=`<line x1="${pad}" y1="${toY(P.goalKg)}" x2="${W-pad}" y2="${toY(P.goalKg)}" stroke="var(--ok)" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>`;
+    // Current point
+    paths+=`<circle cx="${toX(0)}" cy="${toY(ckg)}" r="4" fill="var(--ink)"/>`;
+
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+      <text x="${pad}" y="${(+toY(P.goalKg)-4).toFixed(0)}" font-size="9" fill="var(--ok)" font-family="Poppins,sans-serif" font-weight="600">Goal ${P.goalKg}kg</text>
+      ${paths}
+      <text x="${(+toX(0)+6).toFixed(0)}" y="${(+toY(ckg)+4).toFixed(0)}" font-size="9.5" fill="var(--ink)" font-family="Poppins,sans-serif" font-weight="600">${ckg}kg now</text>
+    </svg>`;
+  }
+
   body.innerHTML=`
-    <div class="g2" style="margin-bottom:11px">
-      <div style="background:var(--s3);border:1px solid var(--border);border-radius:9px;padding:12px">
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">TDEE Now</div>
-        <div style="font-family:'Noto Serif',serif;font-size:22px;font-weight:700;color:#fff">${myTDEE.toLocaleString()} <span style="font-size:12px;color:var(--sub)">kcal</span></div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">Mifflin-St Jeor × 1.725</div>
+    <!-- Phase status -->
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:14px;margin-bottom:14px;border:1.5px solid ${phaseCol}33">
+      <div style="font-size:22px">${rate===null?'📋':rate<0?'📈':rate<0.2?'⏸':rate<=1.0?'✅':'⚡'}</div>
+      <div style="flex:1">
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:${phaseCol};line-height:1.1">${phase.toUpperCase()}</div>
+        <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:2px">${rateLabel}${rate!==null?' · '+Math.abs(rate)+' kg/wk (3-wk avg)':''}</div>
       </div>
-      <div style="background:var(--s3);border:1px solid rgba(58,111,216,.25);border-radius:9px;padding:12px">
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Recommended Intake</div>
-        <div style="font-family:'Noto Serif',serif;font-size:22px;font-weight:700;color:var(--blue-lt)">${recCal.toLocaleString()} <span style="font-size:12px;color:var(--sub)">kcal</span></div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">${myTDEE-recCal} kcal deficit · ~0.7 kg/wk</div>
+      ${eta!==null?`<div style="text-align:right"><div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);color:var(--ok);line-height:1">${eta}</div><div style="font-size:var(--fs-2xs);color:var(--ink3);font-weight:600">WEEKS LEFT</div></div>`:''}
+    </div>
+    ${rateTip?`<div style="font-size:var(--fs-xs);color:var(--ink2);background:${phaseCol}12;border-left:3px solid ${phaseCol};border-radius:0 10px 10px 0;padding:10px 13px;margin-bottom:14px;line-height:1.65">${rateTip}</div>`:''}
+
+    <!-- Scenario comparison -->
+    <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:var(--ink);margin-bottom:10px">Three Scenarios</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px;margin-bottom:14px">
+      ${scenarios.map(s=>{
+        const sc=scenarioETA(s.rate);
+        if(!sc) return `<div style="background:var(--surface2);border-radius:12px;padding:12px;border:1.5px solid ${s.col}33"><div style="font-size:var(--fs-xs);color:var(--ink3);font-weight:600">${s.icon} ${s.label}</div><div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:4px">Not enough data</div></div>`;
+        return `<div style="background:var(--surface2);border-radius:12px;padding:12px;border:1.5px solid ${s.col}44">
+          <div style="font-size:var(--fs-2xs);color:${s.col};font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">${s.icon} ${s.label}</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);color:var(--ink);line-height:1">${sc.wks} <span style="font-size:var(--fs-sm)">wks</span></div>
+          <div style="font-size:var(--fs-xs);color:var(--ink2);margin-top:3px;font-weight:600">${sc.date}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:3px">${sc.kgPerWk} kg/wk · wk ${sc.finalWk}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:5px;line-height:1.5;border-top:1px solid rgba(0,0,0,.07);padding-top:5px">${s.note}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Sparkline trajectory -->
+    <div style="background:var(--surface2);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid rgba(255,255,255,.07)">
+      <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-sm);color:var(--ink);margin-bottom:10px">Weight Trajectory — Next 16 Weeks</div>
+      ${sparkline(scenarios,ckg)}
+      <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap">
+        <span style="font-size:var(--fs-2xs);color:var(--ink3);font-weight:600">
+          <span style="display:inline-block;width:18px;height:2px;background:var(--warn);vertical-align:middle;margin-right:4px;opacity:.8"></span>Plateau path</span>
+        <span style="font-size:var(--fs-2xs);color:var(--ink3);font-weight:600">
+          <span style="display:inline-block;width:18px;height:3px;background:var(--accent);vertical-align:middle;margin-right:4px"></span>Current pace</span>
+        <span style="font-size:var(--fs-2xs);color:var(--ink3);font-weight:600">
+          <span style="display:inline-block;width:18px;height:2px;background:var(--ok);vertical-align:middle;margin-right:4px;opacity:.8"></span>Optimal cut</span>
       </div>
     </div>
-    <div class="g3" style="margin-bottom:11px">
-      <div style="background:var(--s3);border:1px solid rgba(242,167,195,.2);border-radius:9px;padding:10px;text-align:center">
-        <div style="font-family:'Noto Serif',serif;font-size:20px;font-weight:700;color:var(--pink)">${prot}g</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Protein</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">2.0g × ${ckg}kg</div>
+
+    <!-- Next 8 weeks week-by-week -->
+    <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:var(--ink);margin-bottom:10px">Projected Next 8 Weeks</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(90px,12vw,120px),1fr));gap:8px;margin-bottom:14px">
+      ${projWks.map((pw,i)=>{
+        const isGoal=pw.kg<=P.goalKg;
+        const bg=isGoal?'var(--ok)':'var(--surface2)';
+        const textCol=isGoal?'#fff':'var(--ink)';
+        const sub=isGoal?'GOAL!':'var(--ink3)';
+        return `<div style="background:${bg};border:1.5px solid ${isGoal?'var(--ok)':'rgba(0,0,0,.08)'};border-radius:12px;padding:10px;text-align:center">
+          <div style="font-size:var(--fs-2xs);color:${isGoal?'rgba(255,255,255,.8)':'var(--ink3)'};font-weight:600;margin-bottom:2px">WK ${pw.w}</div>
+          <div style="font-size:var(--fs-2xs);color:${isGoal?'rgba(255,255,255,.75)':'var(--ink3)'};margin-bottom:4px">${pw.date}</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:clamp(16px,2.2vw,20px);color:${textCol};line-height:1">${pw.kg}</div>
+          ${isGoal?`<div style="font-size:8px;color:rgba(255,255,255,.9);font-weight:700;margin-top:3px;letter-spacing:.06em">GOAL</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Projected Next 6 Months -->
+    <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:var(--ink);margin-bottom:10px">Projected Next 6 Months</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,15vw,170px),1fr));gap:10px;margin-bottom:18px">
+      ${(function(){
+        const monthsOut=[];
+        for(let i=1;i<=6;i++){
+          const wkNum = cwk + i*4;
+          const projKg = Math.max(P.goalKg, ckg - (rate||0.5) * (i*4));
+          const d = new Date('2026-05-11');
+          d.setDate(d.getDate() + (wkNum-1)*7);
+          const monthLabel = d.toLocaleDateString('en-GB',{month:'long', year:'numeric'});
+          const reached = projKg <= P.goalKg;
+          monthsOut.push({i, wk:wkNum, kg:+projKg.toFixed(1), label:monthLabel, goal:reached});
+        }
+        return monthsOut.map(m=>{
+          const bg = m.goal ? 'var(--lime)' : 'var(--surface2)';
+          const fg = m.goal ? 'var(--lime-dk)' : 'var(--ink)';
+          const subC = m.goal ? 'rgba(0,0,0,.65)' : 'var(--ink3)';
+          const border = m.goal ? 'var(--lime)' : 'rgba(255,255,255,.08)';
+          return `<div style="background:${bg};border:1.5px solid ${border};border-radius:14px;padding:14px 12px;text-align:center;position:relative">
+            <div style="font-size:var(--fs-2xs);color:${subC};font-weight:600;margin-bottom:3px;letter-spacing:.05em">MONTH ${m.i}</div>
+            <div style="font-size:var(--fs-2xs);color:${subC};margin-bottom:6px">${m.label}</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:clamp(20px,2.6vw,26px);color:${fg};line-height:1">${m.kg}<span style="font-size:var(--fs-xs);margin-left:2px">kg</span></div>
+            <div style="font-size:var(--fs-2xs);color:${subC};margin-top:4px">Week ${m.wk}</div>
+            ${m.goal?`<div style="font-size:9px;color:${subC};font-weight:700;margin-top:6px;letter-spacing:.08em">🏆 GOAL REACHED</div>`:''}
+          </div>`;
+        }).join('');
+      })()}
+    </div>
+
+    <!-- Calorie & macro targets -->
+    <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:var(--ink);margin-bottom:10px">Your Targets Now</div>
+    <div class="g2" style="margin-bottom:10px">
+      <div style="background:var(--surface2);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.07)">
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;font-weight:600">TDEE (maintenance)</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-2xl);color:var(--ink);line-height:1">${myTDEE.toLocaleString()} <span style="font-size:var(--fs-xs);color:var(--ink3)">kcal</span></div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:3px">Mifflin-St Jeor at ${ckg}kg</div>
       </div>
-      <div style="background:var(--s3);border:1px solid rgba(126,176,232,.2);border-radius:9px;padding:10px;text-align:center">
-        <div style="font-family:'Noto Serif',serif;font-size:20px;font-weight:700;color:var(--blue-lt)">${carbs}g</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Carbs</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">${carbs*4} kcal</div>
-      </div>
-      <div style="background:var(--s3);border:1px solid rgba(240,184,48,.2);border-radius:9px;padding:10px;text-align:center">
-        <div style="font-family:'Noto Serif',serif;font-size:20px;font-weight:700;color:var(--yellow)">${fat}g</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Fat</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">0.7g/kg floor</div>
+      <div style="background:var(--surface2);border-radius:12px;padding:12px;border:1.5px solid rgba(91,155,213,.3)">
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;font-weight:600">Recommended intake</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-2xl);color:var(--accent);line-height:1">${recCal.toLocaleString()} <span style="font-size:var(--fs-xs);color:var(--ink3)">kcal</span></div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:3px">${myTDEE-recCal} kcal deficit · ~0.7 kg/wk</div>
       </div>
     </div>
-    <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);line-height:1.8;padding:11px;background:var(--s3);border-radius:9px;border:1px solid var(--border)">
-      📐 <strong style="color:var(--text)">Protein:</strong> 2.0 g/kg preserves lean mass (Morton et al. 2018)<br>
-      📐 <strong style="color:var(--text)">Fat floor:</strong> 0.7 g/kg — below risks hormonal disruption<br>
-      📐 <strong style="color:var(--text)">Deficit:</strong> 1 kg fat ≈ 7,700 kcal; 700 kcal/day → ~0.7 kg/wk<br>
-      ${eta!==null?`⏱ <strong style="color:var(--text)">Revised ETA:</strong> <span style="color:var(--green-lt)">~${eta} more weeks at ${rate} kg/wk</span>`:''}
+    <div class="g3" style="margin-bottom:10px">
+      <div style="background:rgba(242,167,195,.12);border:1px solid rgba(242,167,195,.3);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);color:var(--blob-pink)">${prot}g</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:600">Protein</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:2px">2.0g × ${ckg}kg</div>
+      </div>
+      <div style="background:rgba(91,155,213,.1);border:1px solid rgba(91,155,213,.25);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);color:var(--accent)">${carbs}g</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:600">Carbs</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:2px">${carbs*4} kcal</div>
+      </div>
+      <div style="background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:12px;padding:10px;text-align:center">
+        <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xl);color:var(--warn)">${fat}g</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:600">Fat</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:2px">0.7g/kg floor</div>
+      </div>
+    </div>
+    <div style="font-size:var(--fs-xs);color:var(--ink2);line-height:1.8;padding:12px 14px;background:var(--surface2);border-radius:12px;border:1px solid rgba(255,255,255,.07)">
+      📐 <strong style="color:var(--ink)">Protein:</strong> 2.0 g/kg preserves lean mass during deficit (Morton et al. 2018)<br>
+      📐 <strong style="color:var(--ink)">Fat floor:</strong> 0.7 g/kg — below this disrupts hormones<br>
+      📐 <strong style="color:var(--ink)">1 kg fat</strong> = 7,700 kcal. At ${myTDEE-recCal} kcal/day deficit = ~${((myTDEE-recCal)*7/7700).toFixed(2)} kg/wk theoretical max
+    </div>
+
+    <!-- Personal weight-loss chart based on entered data -->
+    <div style="font-family:'Fredoka One',cursive;font-size:var(--fs-md);color:var(--ink);margin:18px 0 10px">Your Personal Weight-Loss Chart</div>
+    <div style="background:var(--surface2);border-radius:14px;padding:14px 16px 8px;border:1px solid rgba(255,255,255,.07)">
+      ${(function(){
+        // Build full chart: historical actual + future projection
+        // Show 24 weeks total: from week 1 to (current + 16) up to goal
+        const startKg = P.startKg;
+        const goalKg = P.goalKg;
+        const maxWk = Math.min(50, Math.max(24, cwk + 16));
+        const points = []; // {w, kg, type}
+        for(let w=0; w<=maxWk; w++){
+          if(w===0){ points.push({w:0, kg:startKg, type:'start'}); continue; }
+          if(logs[w]!==undefined){ points.push({w, kg:logs[w], type:'actual'}); }
+          else if(w<=cwk){ continue; } // skipped weeks
+          else {
+            const proj = Math.max(goalKg, ckg - (rate||0.5)*(w-cwk));
+            points.push({w, kg:+proj.toFixed(2), type:'projection'});
+          }
+        }
+        // SVG dimensions
+        const W = 760, H = 200, padL=42, padR=18, padT=18, padB=30;
+        const innerW = W - padL - padR;
+        const innerH = H - padT - padB;
+        const minKg = goalKg - 1;
+        const maxKgY = startKg + 1;
+        const toX = w => padL + (w/maxWk) * innerW;
+        const toY = kg => padT + (1 - (kg-minKg)/(maxKgY-minKg)) * innerH;
+
+        // Build paths
+        const actuals = points.filter(p=>p.type==='start'||p.type==='actual');
+        const projections = points.filter(p=>p.type==='projection');
+
+        let svg = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="200" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">';
+
+        // Y-axis gridlines (every 2 kg)
+        for(let kg=Math.ceil(minKg); kg<=Math.floor(maxKgY); kg+=2){
+          const y = toY(kg);
+          svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="rgba(255,255,255,.04)" stroke-width="1"/>';
+          svg += '<text x="'+(padL-6)+'" y="'+(y+3)+'" font-size="9" fill="var(--ink3)" text-anchor="end" font-family="Poppins,sans-serif">'+kg+'</text>';
+        }
+        // Goal line
+        const goalY = toY(goalKg);
+        svg += '<line x1="'+padL+'" y1="'+goalY+'" x2="'+(W-padR)+'" y2="'+goalY+'" stroke="var(--lime)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>';
+        svg += '<text x="'+(W-padR-4)+'" y="'+(goalY-4)+'" font-size="10" fill="var(--lime)" text-anchor="end" font-family="Poppins,sans-serif" font-weight="600">Goal '+goalKg+'kg</text>';
+
+        // X-axis weeks marks every 4 weeks
+        for(let w=0; w<=maxWk; w+=4){
+          const x = toX(w);
+          svg += '<text x="'+x+'" y="'+(H-padB+14)+'" font-size="9" fill="var(--ink3)" text-anchor="middle" font-family="Poppins,sans-serif">W'+w+'</text>';
+        }
+
+        // Projection path (dashed sky)
+        if(projections.length){
+          // Connect from last actual to first projection
+          const lastActual = actuals[actuals.length-1];
+          const allProj = lastActual ? [lastActual, ...projections] : projections;
+          let pPath = 'M '+toX(allProj[0].w)+' '+toY(allProj[0].kg);
+          for(let i=1;i<allProj.length;i++){
+            pPath += ' L '+toX(allProj[i].w)+' '+toY(allProj[i].kg);
+          }
+          // Area fill under projection
+          const lastP = allProj[allProj.length-1];
+          const firstP = allProj[0];
+          let pArea = pPath + ' L '+toX(lastP.w)+' '+toY(minKg)+' L '+toX(firstP.w)+' '+toY(minKg)+' Z';
+          svg += '<path d="'+pArea+'" fill="var(--sky)" opacity=".08"/>';
+          svg += '<path d="'+pPath+'" stroke="var(--sky)" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+
+        // Actual path (solid lime)
+        if(actuals.length>=2){
+          let aPath = 'M '+toX(actuals[0].w)+' '+toY(actuals[0].kg);
+          for(let i=1;i<actuals.length;i++){
+            aPath += ' L '+toX(actuals[i].w)+' '+toY(actuals[i].kg);
+          }
+          // Area under actuals
+          const lastA = actuals[actuals.length-1];
+          const firstA = actuals[0];
+          let aArea = aPath + ' L '+toX(lastA.w)+' '+toY(minKg)+' L '+toX(firstA.w)+' '+toY(minKg)+' Z';
+          svg += '<path d="'+aArea+'" fill="var(--lime)" opacity=".1"/>';
+          svg += '<path d="'+aPath+'" stroke="var(--lime)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+
+        // Data points for actuals
+        actuals.forEach(p=>{
+          svg += '<circle cx="'+toX(p.w)+'" cy="'+toY(p.kg)+'" r="4" fill="var(--lime)" stroke="var(--bg)" stroke-width="2"/>';
+        });
+        // Current weight marker (larger, special)
+        if(actuals.length){
+          const cur = actuals[actuals.length-1];
+          svg += '<circle cx="'+toX(cur.w)+'" cy="'+toY(cur.kg)+'" r="6" fill="var(--lime)" stroke="var(--bg)" stroke-width="2.5"/>';
+          svg += '<text x="'+toX(cur.w)+'" y="'+(toY(cur.kg)-12)+'" font-size="11" fill="var(--lime)" text-anchor="middle" font-family="Fredoka One,cursive" font-weight="bold">'+cur.kg+'kg</text>';
+        }
+
+        svg += '</svg>';
+        return svg;
+      })()}
+      <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;padding-left:42px">
+        <span style="font-size:var(--fs-2xs);color:var(--ink2);font-weight:500"><span style="display:inline-block;width:18px;height:3px;background:var(--lime);vertical-align:middle;margin-right:5px;border-radius:99px"></span>Your actual weights</span>
+        <span style="font-size:var(--fs-2xs);color:var(--ink2);font-weight:500"><span style="display:inline-block;width:18px;height:2px;background:var(--sky);vertical-align:middle;margin-right:5px;border-radius:99px"></span>Projected path</span>
+        <span style="font-size:var(--fs-2xs);color:var(--ink2);font-weight:500"><span style="display:inline-block;width:18px;height:1.5px;background:var(--lime);vertical-align:middle;margin-right:5px;border-radius:99px;opacity:.6"></span>Goal line</span>
+      </div>
     </div>`;
 }
 
 /* ════════════════════════════════════
-   TIMELINE
+   ADAPTIVE TIMELINE — 6-15 phases
 ════════════════════════════════════ */
+
+/* weekDate but showing year only when beyond 2026 */
+function weekDateFull(w) {
+  const d = new Date('2026-05-11');
+  d.setDate(d.getDate() + (w-1)*7);
+  const isNextYear = d.getFullYear() > 2026;
+  if(isNextYear) return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+/* Generate dynamic phases based on actual rate and remaining kg */
+function buildPhases() {
+  const ckg = currKg();
+  const cwk = currWk();
+  const rate = avgRate() || 0.7; // default to 0.7 if no data yet
+  const effectiveRate = Math.max(0.1, rate); // guard against 0
+
+  const totalWeeksNeeded = Math.ceil((P.startKg - P.goalKg) / effectiveRate);
+  const remainingWeeks = Math.ceil((ckg - P.goalKg) / effectiveRate);
+  const etaWeek = cwk + remainingWeeks;
+
+  // Phase count: min 6, max 15, scaled to journey length
+  const rawPhases = Math.round(totalWeeksNeeded / 4); // roughly monthly
+  const numPhases = Math.max(6, Math.min(15, rawPhases));
+
+  const phases = [];
+  const totalLoss = P.startKg - P.goalKg;
+  const totalBFLoss = P.startBF - P.goalBF;
+  const startCal = 2000;
+  const phaseTips = [
+    ['Weigh 3× per week, same conditions','Expect daily ±1-2 kg swings, use 3-week avg','Front-load protein at breakfast','3L water minimum daily'],
+    ['Add 2.5 kg when you hit top reps','Monthly progress photos in same lighting','Track waist, not just scale','5g creatine daily preserves strength'],
+    ['Drop to 1,950 kcal to counter adaptation','Add 20-min walk if stalling 2+ weeks','Never skip legs: maximise fat burn','One maintenance-calorie day per week is fine'],
+    ['1 refeed day per week at maintenance calories','Intensity up: drop sets, supersets','7-9h sleep: GH peaks in deep sleep','Visible change phase: trust the process'],
+    ['Protein to 160g: critical at lower body fat','Try carb cycling now','Deload every 6-8 weeks','Document your progress'],
+    ['Progressive overload still matters on cut','Hydration: 3L minimum daily','Check measurements not just scale','You are over halfway'],
+    ['Sleep 8h: recovery is the workout','Reduce sodium to cut water weight','Supplement Vitamin D and Omega-3','Stay consistent, variance is normal'],
+    ['Stretch and mobility: prevent injury','Consider a 1-week diet break at TDEE','Volume can drop but intensity must not','You look different already'],
+    ['Increase protein to 2.2g/kg now','Carb cycle: high on lift days, low on rest','Track every meal for 2 weeks','Check in with a trainer'],
+    ['Final stretch: tighten sleep and stress','Cortisol kills progress: manage it','Alcohol: avoid completely now','Almost there - do not quit'],
+    ['Reverse diet planning starts now','Identify maintenance calorie range','Plan lean bulk start date','Celebrate the discipline built'],
+    ['Transition phase: add 150 kcal/week','Assess which lifts to prioritise in bulk','Review body composition goals','Log everything for 2 more weeks'],
+    ['Lean bulk: max 200 kcal surplus','Prioritise compound lifts','Monthly DEXA or progress photos','You have earned this phase'],
+    ['Build phase: consistency compounds','3+ months of controlled surplus','Protein still at 1.8g/kg','Set new performance goals'],
+    ['Recomposition ongoing: strength first','Annual plan: cuts and builds in cycles','Share your progress, help others','You are an athlete now'],
+  ];
+  const phaseTitles = [
+    'The Ignition','Building Momentum','The Grind','Visible Change','The Reveal',
+    'Final Push','Consistency Phase','Breaking Through','Digging Deep','Homestretch',
+    'Almost There','Goal Achieved','New Chapter','Build Phase','Long Game'
+  ];
+  const phaseBadges = [
+    {label:'Active Cut',cls:'b-cut'},
+    {label:'Active Cut',cls:'b-cut'},
+    {label:'⚠ Plateau Risk',cls:'b-plateau'},
+    {label:'Active Cut',cls:'b-cut'},
+    {label:'Active Cut',cls:'b-cut'},
+    {label:'Active Cut',cls:'b-cut'},
+    {label:'Steady Cut',cls:'b-cut'},
+    {label:'Breaking Through',cls:'b-cut'},
+    {label:'Deep Cut',cls:'b-cut'},
+    {label:'Final Phase',cls:'b-plateau'},
+    {label:'Almost Goal',cls:'b-plateau'},
+    {label:'🏆 Goal Hit',cls:'b-goal'},
+    {label:'Maintenance',cls:'b-goal'},
+    {label:'Lean Bulk',cls:'b-goal'},
+    {label:'Long Game',cls:'b-goal'},
+  ];
+  const phaseDescs = [
+    'Big water-weight drop in week 1 (2-3 kg). Glycogen depletion drives initial loss. Real fat burning begins week 2. Face slims, belt loosens.',
+    'Water weight stabilises. Real fat burning is now dominant. Waist shrinking week by week. Lifts increasing. Sleep improving.',
+    'Scale may stall 1-2 weeks due to metabolic adaptation. Body is reshaping even when the scale is quiet. Push through.',
+    'People start noticing. Jawline sharp, neck slim, shoulders visibly wider than waist. You are entering visibly fit territory.',
+    'At around 18-20% body fat, upper abs become visible. Athletic physique forming. Energy is stable and consistent.',
+    'You are over halfway. The discipline compounds. Every week now reveals more of the physique you have been building.',
+    'Consistency is the weapon. Your metabolism has adapted and you are burning fat efficiently. Results are accelerating.',
+    'The final third of your journey. Definition in unexpected places. People who have not seen you in months will react strongly.',
+    'Deep in the cut now. Lower body fat requires more precision. Sleep, stress and protein become critical levers.',
+    'The homestretch. Every kilogram removed reveals more muscle. The goal is clearly visible on the horizon.',
+    'Almost there. Hold the line. This phase separates those who complete the journey from those who do not.',
+    '77 kg and around 16.5% body fat: athletic, lean and strong. Time to reverse diet carefully and avoid fat rebound.',
+    'Transition to maintenance. Add 150 kcal per week until TDEE is reached. Protect the physique you built.',
+    'Lean bulk phase. Maximum 200 kcal surplus. Slow, controlled muscle gain while staying lean.',
+    'The long game. Recomposition cycles. You are an athlete now. Set new performance and physique milestones.',
+  ];
+  const phaseBodyNotes = [
+    'Soft abdomen, no visible definition yet. Upper body shape improving with training.',
+    'Waist thinning. Shoulders appear broader. Early V-taper forming.',
+    'Definition emerging in shoulders and arms. Belly reducing. Noticeably leaner face.',
+    'Clear V-taper. Upper abs beginning. Arms muscular. Face transformed.',
+    'Athletic and lean. Abs in good lighting. Clear muscle separation.',
+    'Obliques showing. Chest definition visible. Confident posture.',
+    'Lean and capable. Clothes fit completely differently. Strong from every angle.',
+    'V-taper is pronounced. Upper abs fully visible. Rear definition improving.',
+    'Defined upper body. Mid-section clean. Veins beginning to show in forearms.',
+    'Full physique coming together. Lower abs in good lighting. Glutes and legs defined.',
+    'Competition-ready appearance. Full muscle separation. Low body fat percentage.',
+    'Full athletic physique. Visible abs, wide shoulders. 2+ clothing sizes down.',
+    'Lean and full looking. Glycogen stores topped up. Muscles round and defined.',
+    'Slowly adding muscle mass. Staying lean while growing. Best of both worlds.',
+    'Long-term athlete physique. Consistent, sustainable, impressive.',
+  ];
+  const monthAccents = ['var(--sky)','var(--lime)','var(--amber)','var(--pink)','var(--coral)','var(--sky)','var(--lime)','var(--amber)','var(--pink)','var(--coral)','var(--sky)','var(--lime)','var(--amber)','var(--pink)','var(--coral)'];
+
+  const weeksPerPhase = etaWeek / numPhases;
+
+  for(let i=0; i<numPhases; i++) {
+    const phaseStartWk = Math.round(i * weeksPerPhase) + 1;
+    const phaseEndWk   = i < numPhases-1 ? Math.round((i+1) * weeksPerPhase) : etaWeek;
+    const safeEnd      = Math.max(phaseStartWk, phaseEndWk);
+
+    // Weight at start/end of this phase
+    const phaseStartKg = +Math.max(P.goalKg, P.startKg - (totalLoss/etaWeek) * (phaseStartWk-1)).toFixed(1);
+    const phaseEndKg   = +Math.max(P.goalKg, P.startKg - (totalLoss/etaWeek) * safeEnd).toFixed(1);
+    const phaseBF_s    = +(P.startBF - (totalBFLoss/etaWeek) * (phaseStartWk-1)).toFixed(1);
+    const phaseBF_e    = +(P.startBF - (totalBFLoss/etaWeek) * safeEnd).toFixed(1);
+
+    // Calories: start at 2000, end at 2200 for final phase
+    const phaseCal = i === numPhases-1 ? 2200 : Math.round(startCal - (i/(numPhases-1)) * 50);
+    const phaseDeficit = i === numPhases-1 ? 0 : Math.round((phaseCal > 0 ? 2750 - phaseCal : 0) * 0.9);
+    const phaseProt = i >= numPhases-2 ? 160 : 155;
+    const phaseCarbs = Math.max(50, Math.round((phaseCal - phaseProt*4 - 56*9) / 4));
+
+    // Build week list for this phase
+    const phaseWeeks = [];
+    for(let w=phaseStartWk; w<=safeEnd && w<=etaWeek; w++) {
+      const projKg = +Math.max(P.goalKg, P.startKg - (totalLoss/etaWeek)*(w-1)).toFixed(1);
+      phaseWeeks.push({w, pk: projKg});
+    }
+
+    phases.push({
+      num: String(i+1).padStart(2,'0'),
+      title: phaseTitles[i] || ('Phase '+(i+1)),
+      range: `Weeks ${phaseStartWk}-${safeEnd} · ${weekDateFull(phaseStartWk)} - ${weekDateFull(safeEnd)}`,
+      badge: (phaseBadges[i]||phaseBadges[5]).label,
+      bc: (phaseBadges[i]||phaseBadges[5]).cls,
+      startW: phaseStartKg,
+      endW: phaseEndKg,
+      startBF: Math.max(P.goalBF, phaseBF_s),
+      endBF: Math.max(P.goalBF, phaseBF_e),
+      cal: phaseCal,
+      deficit: phaseDeficit,
+      prot: phaseProt,
+      carbs: phaseCarbs,
+      fat: 56,
+      desc: phaseDescs[i] || phaseDescs[5],
+      body: phaseBodyNotes[i] || phaseBodyNotes[5],
+      weeks: phaseWeeks,
+      tips: phaseTips[i] || phaseTips[5],
+      accent: monthAccents[i % monthAccents.length],
+    });
+  }
+
+  return phases;
+}
+
 function buildTimeline(){
-  const root=document.getElementById('tl-root');root.innerHTML='';
-  const{ws:logged}=logArr();const rate=avgRate();
+  const root=document.getElementById('tl-root');
+  root.innerHTML='';
+  const {ws:logged}=logArr();
+  const rate=avgRate();
   const tAlert=document.getElementById('tl-alert');
-  tAlert.innerHTML=logged.length>=2
-    ?`<div class="alert al-g">📅 Actual logged weights shown below. Current rate: ${rate} kg/wk.</div>`
-    :`<div class="alert al-b">📅 Log weekly weights to see your actual progress vs plan here.</div>`;
-  MONTHS.forEach((m,mi)=>{
-    const mWks=m.weeks.map(wk=>wk.w);
-    const allLogged=mWks.every(w=>logs[w]!==undefined);
-    const anyLogged=mWks.some(w=>logs[w]!==undefined);
-    const lastWk=m.weeks[m.weeks.length-1].w;
-    let bcls='mblock';
-    if(allLogged)bcls+=' mb-done';else if(anyLogged)bcls+=' mb-cur';
-    const block=document.createElement('div');block.className=bcls;
+
+  const ckg=currKg(), cwk=currWk();
+  const effectiveRate = rate || 0.7;
+  const totalWeeksNeeded = Math.ceil((P.startKg - P.goalKg) / Math.max(0.1, effectiveRate));
+  const etaWeek = cwk + Math.ceil((ckg - P.goalKg) / Math.max(0.1, effectiveRate));
+
+  const rateStr = rate ? ` Current rate: ${rate} kg/wk.` : '';
+  const etaDate = weekDateFull(etaWeek);
+  tAlert.innerHTML = logged.length>=2
+    ? `<div class="alert al-g">📅 Timeline updated from your logged weights.${rateStr} Projected goal: ${etaDate}</div>`
+    : `<div class="alert al-b">📅 Timeline shows default plan. Log weekly weights to unlock your personalised adaptive timeline.</div>`;
+
+  const phases = buildPhases();
+
+  phases.forEach((m, mi) => {
+    const mWks = m.weeks.map(wk=>wk.w);
+    const allLogged = mWks.length > 0 && mWks.every(w=>logs[w]!==undefined);
+    const anyLogged = mWks.some(w=>logs[w]!==undefined);
+    const lastWk = m.weeks.length > 0 ? m.weeks[m.weeks.length-1].w : 0;
+    let bcls = 'mblock';
+    if(allLogged) bcls+=' mb-done';
+    else if(anyLogged) bcls+=' mb-cur';
+    const block = document.createElement('div');
+    block.className = bcls;
+
+    // Week-by-week: show actual logged weight if exists, else projected
+    const weekItems = m.weeks.map(wk=>{
+      const actual = logs[wk.w];
+      const prev = logs[wk.w-1] || (wk.w===1 ? P.startKg : null);
+      const prevProj = wk.w > 1 ? +Math.max(P.goalKg, P.startKg - (P.startKg-P.goalKg)/etaWeek*(wk.w-2)).toFixed(1) : P.startKg;
+      const delta = actual!==undefined && prev!==null ? (actual-prev).toFixed(2) : null;
+      const isAct = actual !== undefined;
+      const displayKg = isAct ? actual : wk.pk;
+      const dc = delta!==null ? (+delta<0?'color:var(--lime)':+delta>0?'color:var(--coral)':'color:var(--ink3)') : '';
+      return `<div class="mwitem ${isAct?'mwact':''}">
+        <div class="mwnum">Week ${wk.w}</div>
+        <div class="mwdate">${weekDateFull(wk.w)}</div>
+        <div class="mwkg">${displayKg} kg</div>
+        ${delta!==null?`<div class="mwdelta" style="${dc}">${+delta>0?'+':''}${delta} kg</div>`:''}
+        <div class="mwbadge">${isAct ? '● actual' : '◌ projected'}</div>
+      </div>`;
+    }).join('');
+
+    // Actual end weight display
+    const actualEndNote = allLogged && lastWk && logs[lastWk]
+      ? ` · ${logs[lastWk]}kg actual`
+      : '';
+
     block.innerHTML=`
       <div class="mdot">${m.num}</div>
       <div class="mcard" id="mc-${mi}">
-        <div class="mtop" onclick="toggleM(${mi})">
+        <div class="mtop" onclick="toggleM(${mi})" style="--m-accent:${m.accent}">
           <div class="mnum">${m.num}</div>
           <div class="minfo"><div class="mtitle">${m.title}</div><div class="mrange">${m.range}</div></div>
           <div class="mbadge ${m.bc}">${m.badge}</div>
           <div class="marrow">▾</div>
         </div>
         <div class="mbody">
-          <div class="msrow">
-            <div class="mscell">
-              <div class="mslbl">Weight Plan</div>
-              <div class="msval" style="color:var(--blue-lt)">${m.startW} → ${m.endW} kg</div>
-              <div class="mssub">−${(m.startW-m.endW).toFixed(1)} kg</div>
-              ${allLogged?`<div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--green-lt);margin-top:3px">✓ Actual end: ${logs[lastWk]} kg</div>`:''}
+          <div class="m-icon-row">
+            <div class="m-icon-cell">
+              <div class="m-icon-block ic-sky"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="6" r="3"/><rect x="11.5" y="9" width="3" height="14" rx="1.5"/><rect x="5" y="14" width="16" height="3" rx="1.5"/><circle cx="6.5" cy="20" r="3.2"/><circle cx="19.5" cy="20" r="3.2"/></svg></div>
+              <div class="m-icon-label">Weight</div>
+              <div class="m-icon-value" style="color:var(--sky)">${m.startW}→${m.endW}</div>
+              <div class="m-icon-sub">${(m.startW-m.endW).toFixed(1)} kg${actualEndNote}</div>
             </div>
-            <div class="mscell">
-              <div class="mslbl">Body Fat %</div>
-              <div class="msval" style="color:var(--yellow)">${m.startBF}% → ${m.endBF}%</div>
-              <div class="mstrip" style="margin-top:6px"><div class="mp" style="width:${m.endBF*3}%"></div><div class="mc" style="width:${(28-m.endBF)*3}%"></div><div class="mf" style="flex:1"></div></div>
-              ${allLogged?`<div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--blue-lt);margin-top:3px">Est. actual: ${estBF(logs[lastWk])}%</div>`:''}
+            <div class="m-icon-cell">
+              <div class="m-icon-block ic-warn"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M13 2C13 2 6 10 6 16a7 7 0 0014 0c0-6-7-14-7-14Z"/><circle cx="13" cy="16" r="2.5" fill="rgba(255,255,255,.5)"/></svg></div>
+              <div class="m-icon-label">Body Fat</div>
+              <div class="m-icon-value" style="color:var(--warn)">${m.startBF}→${m.endBF}%</div>
+              <div class="m-icon-sub">${allLogged && lastWk && logs[lastWk] ? `est. ${estBF(logs[lastWk])}%` : 'projected'}</div>
             </div>
-            <div class="mscell">
-              <div class="mslbl">Daily Calories</div>
-              <div class="msval" style="color:var(--green-lt)">${m.cal.toLocaleString()}</div>
-              <div class="mssub">${m.deficit>0?'−'+m.deficit+' deficit':'Maintenance'}</div>
+            <div class="m-icon-cell">
+              <div class="m-icon-block ic-lime"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M13 6C11 4 8 4 6 6c-2.5 2.5-2 7 0 11 1.5 3 4 5 7 5s5.5-2 7-5c2-4 2.5-8.5 0-11-2-2-5-2-7 0Z"/><path d="M13 6c0-2 1.5-3 3-3" stroke="rgba(0,0,0,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="16" cy="3.5" rx="2" ry="1.2" transform="rotate(-30 16 3.5)"/></svg></div>
+              <div class="m-icon-label">Calories</div>
+              <div class="m-icon-value" style="color:var(--lime)">${m.cal.toLocaleString()}</div>
+              <div class="m-icon-sub">${m.deficit>0?'-'+m.deficit+' deficit':'Maintenance'}</div>
             </div>
-            <div class="mscell">
-              <div class="mslbl">P / C / F</div>
-              <div class="msval" style="color:var(--pink)">${m.prot}g</div>
-              <div class="mssub">${m.carbs}g carbs · ${m.fat}g fat</div>
-              <div class="mstrip" style="margin-top:6px"><div class="mp" style="width:${Math.round(m.prot*4/m.cal*100)}%"></div><div class="mc" style="width:${Math.round(m.carbs*4/m.cal*100)}%"></div><div class="mf" style="flex:1"></div></div>
+            <div class="m-icon-cell">
+              <div class="m-icon-block ic-pink"><svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="11" width="4" height="4" rx="1.5"/><rect x="19" y="11" width="4" height="4" rx="1.5"/><rect x="7" y="9" width="2.5" height="8" rx="1"/><rect x="16.5" y="9" width="2.5" height="8" rx="1"/><rect x="9.5" y="11.5" width="7" height="3" rx="1.5"/></svg></div>
+              <div class="m-icon-label">Protein</div>
+              <div class="m-icon-value" style="color:var(--pink)">${m.prot}g</div>
+              <div class="m-icon-sub">${m.carbs}g C · ${m.fat}g F</div>
             </div>
           </div>
           <div class="look-row">
-            <div>${bodySVG(m.endBF)}</div>
-            <div class="look-text"><strong>How your body will look &amp; feel</strong>${m.desc}<br><span style="color:var(--silver);font-size:10px;display:inline-block;margin-top:4px">📐 ${m.body}</span></div>
+            <div class="look-fig">${bodySVG(m.endBF)}</div>
+            <div class="look-text"><strong>How your body will look &amp; feel</strong>${m.desc}<br><span style="color:var(--ink2);font-size:10px;display:inline-block;margin-top:4px">${m.body}</span></div>
           </div>
           <div class="mwrow">
             <div class="mwlbl">Week-by-week weights</div>
-            <div class="mwgrid">
-              ${m.weeks.map(wk=>{
-                const actual=logs[wk.w];
-                const prev=logs[wk.w-1]||(wk.w===1?P.startKg:null);
-                const delta=actual&&prev?(actual-prev).toFixed(2):null;
-                const isAct=actual!==undefined;
-                const dc=delta!==null?(+delta<0?'color:var(--green-lt)':+delta>0?'color:#ff8070':'color:var(--sub)'):'';
-                return`<div class="mwitem ${isAct?'mwact':''}">
-                  <div class="mwnum">Week ${wk.w}</div>
-                  <div class="mwdate">${weekDate(wk.w)}</div>
-                  <div class="mwkg">${isAct?actual:wk.pk} kg</div>
-                  ${delta!==null?`<div class="mwdelta" style="${dc}">${+delta>0?'+':''}${delta} kg</div>`:''}
-                  <div class="mwbadge">${isAct?'● actual':'◌ plan'}</div>
-                </div>`;
-              }).join('')}
-            </div>
+            <div class="mwgrid">${weekItems}</div>
           </div>
-          <div class="trow"><div class="tlbl">💡 Key actions</div><div class="tchips">${m.tips.map(t=>`<div class="tchip">${t}</div>`).join('')}</div></div>
+          <div class="trow"><div class="tlbl">Key actions</div><div class="tchips">${m.tips.map(t=>`<div class="tchip">${t}</div>`).join('')}</div></div>
         </div>
       </div>`;
     root.appendChild(block);
   });
-  toggleM(0);
+
+  // Open first card
+  const first = document.getElementById('mc-0');
+  if(first) first.classList.add('open');
 }
-function toggleM(i){document.getElementById('mc-'+i).classList.toggle('open')}
+function toggleM(i){
+  const card = document.getElementById('mc-'+i);
+  if(card) card.classList.toggle('open');
+}
 
 /* ════════════════════════════════════
    DASHBOARD
@@ -1157,7 +1800,7 @@ function buildDashboard(){
     if(diff!==null)status=diff<=0.3?'<span class="pos">✓ on track</span>':diff<=1.5?'<span class="warn">~ slight lag</span>':'<span class="neg">! behind</span>';
     html+=`<tr class="${isCur?'row-now':''}">
       <td>${w===24?`<span class="hit">W${w}</span>`:`W${w}`}</td>
-      <td style="color:var(--sub)">${weekDate(w)}</td>
+      <td style="color:var(--ink3)">${weekDate(w)}</td>
       <td class="${actual!==undefined?'act':'prj'}">${actual!==undefined?actual:'—'}</td>
       <td class="prj">${plan}</td>
       <td class="${diff!==null?(diff<=0?'pos':diff<=1.5?'warn':'neg'):'prj'}">${diff!==null?(diff>0?'+':'')+diff:'—'}</td>
@@ -1190,20 +1833,20 @@ function buildCharts(){
   const co={
     responsive:true,
     plugins:{
-      legend:{labels:{color:'#7080A0',font:{family:'Roboto',size:10},boxWidth:16}},
-      tooltip:{backgroundColor:'#0F1118',borderColor:'#1E2438',borderWidth:1,titleColor:'#fff',bodyColor:'#aaa',titleFont:{family:'Roboto'},bodyFont:{family:'Roboto',size:10}}
+      legend:{labels:{color:'#8888AA',font:{family:'Roboto',size:10},boxWidth:16}},
+      tooltip:{backgroundColor:'rgba(15,17,24,.96)',borderColor:'rgba(0,0,0,.07)',borderWidth:1,titleColor:'#EEEEF8',bodyColor:'#8888AA',titleFont:{family:'Roboto'},bodyFont:{family:'Roboto',size:10}}
     },
     scales:{
-      x:{grid:{color:'#1E2438'},ticks:{color:'#404868',font:{size:9}}},
-      y:{grid:{color:'#1E2438'},ticks:{color:'#404868',font:{size:10}}}
+      x:{grid:{color:'rgba(255,255,255,.07)'},ticks:{color:'#8888AA',font:{size:9}}},
+      y:{grid:{color:'rgba(255,255,255,.07)'},ticks:{color:'#8888AA',font:{size:10}}}
     }
   };
 
   _charts.w=new Chart(document.getElementById('ch-main'),{type:'line',data:{labels,datasets:[
     {label:'Plan',data:plan,borderColor:'#272E48',borderDash:[5,4],pointRadius:0,tension:.35},
     {label:'Adaptive Forecast',data:adaptFwd,borderColor:'#7EB0E8',borderDash:[3,3],pointRadius:0,tension:.35,borderWidth:1.5},
-    {label:'Actual',data:actual,borderColor:'#3A6FD8',backgroundColor:'rgba(58,111,216,.1)',tension:.35,fill:true,pointRadius:4,pointBackgroundColor:'#3A6FD8',spanGaps:false},
-    {label:'Goal (77 kg)',data:goal,borderColor:'#1A7A45',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
+    {label:'Actual',data:actual,borderColor:'#7EC8F0',backgroundColor:'rgba(126,200,240,.1)',tension:.35,fill:true,pointRadius:4,pointBackgroundColor:'#7EC8F0',spanGaps:false},
+    {label:'Goal (77 kg)',data:goal,borderColor:'#C8F135',borderDash:[6,4],pointRadius:0,borderWidth:1.5},
   ]},options:{...co,scales:{...co.scales,y:{...co.scales.y,min:74,max:96}}}});
 
   const rateData=labels.map((_,i)=>{
@@ -1213,23 +1856,23 @@ function buildCharts(){
   });
   _charts.r=new Chart(document.getElementById('ch-rate'),{type:'bar',data:{labels,datasets:[
     {label:'Weekly Loss (kg)',data:rateData,backgroundColor:rateData.map(v=>v===null?'transparent':v>=0.5&&v<=1.0?'rgba(26,122,69,.6)':v>1.0?'rgba(126,176,232,.6)':v<0?'rgba(232,64,48,.6)':'rgba(240,184,48,.6)'),borderRadius:4},
-    {label:'Target 0.7',data:labels.map(()=>.7),type:'line',borderColor:'#3A6FD8',borderDash:[4,3],pointRadius:0,borderWidth:1.5},
+    {label:'Target 0.7',data:labels.map(()=>.7),type:'line',borderColor:'#7EC8F0',borderDash:[4,3],pointRadius:0,borderWidth:1.5},
   ]},options:co});
 
   const bfAct=labels.map((_,i)=>logs[i+1]?estBF(logs[i+1]):null);
   const bfPlan=labels.map((_,i)=>estBF(planKg(i+1)));
   _charts.b=new Chart(document.getElementById('ch-bf'),{type:'line',data:{labels,datasets:[
     {label:'Plan BF%',data:bfPlan,borderColor:'#272E48',borderDash:[4,3],pointRadius:0,tension:.35},
-    {label:'Actual BF%',data:bfAct,borderColor:'#F0B830',backgroundColor:'rgba(240,184,48,.08)',tension:.35,fill:true,pointRadius:3,spanGaps:false},
-    {label:'Goal 16.5%',data:labels.map(()=>16.5),borderColor:'#1A7A45',borderDash:[5,4],pointRadius:0},
+    {label:'Actual BF%',data:bfAct,borderColor:'#FFD93D',backgroundColor:'rgba(255,217,61,.08)',tension:.35,fill:true,pointRadius:3,spanGaps:false},
+    {label:'Goal 16.5%',data:labels.map(()=>16.5),borderColor:'#C8F135',borderDash:[5,4],pointRadius:0},
   ]},options:co});
 
   const cumAct=labels.map((_,i)=>logs[i+1]?+(P.startKg-logs[i+1]).toFixed(1):null);
   const cumPlan=labels.map((_,i)=>+(P.startKg-planKg(i+1)).toFixed(1));
   _charts.c=new Chart(document.getElementById('ch-cum'),{type:'line',data:{labels,datasets:[
     {label:'Plan',data:cumPlan,borderColor:'#272E48',borderDash:[4,3],pointRadius:0,tension:.35},
-    {label:'Actual Loss',data:cumAct,borderColor:'#6FB87A',backgroundColor:'rgba(111,184,122,.08)',tension:.35,fill:true,pointRadius:3,spanGaps:false},
-    {label:'Goal (17 kg)',data:labels.map(()=>17),borderColor:'#3A6FD8',borderDash:[5,4],pointRadius:0},
+    {label:'Actual Loss',data:cumAct,borderColor:'#C8F135',backgroundColor:'rgba(200,241,53,.08)',tension:.35,fill:true,pointRadius:3,spanGaps:false},
+    {label:'Goal (17 kg)',data:labels.map(()=>17),borderColor:'#7EC8F0',borderDash:[5,4],pointRadius:0},
   ]},options:co});
 }
 
@@ -1242,30 +1885,30 @@ function buildNutrition(){
   const prot=Math.round(ckg*2.0),fat=Math.round(ckg*0.7),carbs=Math.max(50,Math.round((recCal-prot*4-fat*9)/4));
   document.getElementById('prot-target').textContent=prot+'g/day';
   document.getElementById('macro-boxes').innerHTML=`
-    <div style="background:var(--s3);border:1px solid rgba(242,167,195,.25);border-radius:9px;padding:13px;text-align:center">
-      <div style="font-family:'Noto Serif',serif;font-size:26px;font-weight:700;color:var(--pink)">${prot}g</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Protein · ${prot*4} kcal</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">${Math.round(prot*4/recCal*100)}% of intake</div>
+    <div style="background:var(--surface2);border:1px solid rgba(242,167,195,.25);border-radius:9px;padding:13px;text-align:center">
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;font-weight:700;color:var(--blob-pink)">${prot}g</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Protein · ${prot*4} kcal</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);margin-top:2px">${Math.round(prot*4/recCal*100)}% of intake</div>
     </div>
-    <div style="background:var(--s3);border:1px solid rgba(126,176,232,.25);border-radius:9px;padding:13px;text-align:center">
-      <div style="font-family:'Noto Serif',serif;font-size:26px;font-weight:700;color:var(--blue-lt)">${carbs}g</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Carbs · ${carbs*4} kcal</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">${Math.round(carbs*4/recCal*100)}% of intake</div>
+    <div style="background:var(--surface2);border:1px solid rgba(126,176,232,.25);border-radius:9px;padding:13px;text-align:center">
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;font-weight:700;color:var(--accent)">${carbs}g</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Carbs · ${carbs*4} kcal</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);margin-top:2px">${Math.round(carbs*4/recCal*100)}% of intake</div>
     </div>
-    <div style="background:var(--s3);border:1px solid rgba(240,184,48,.25);border-radius:9px;padding:13px;text-align:center">
-      <div style="font-family:'Noto Serif',serif;font-size:26px;font-weight:700;color:var(--yellow)">${fat}g</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Fat · ${fat*9} kcal</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;color:var(--sub);margin-top:2px">${Math.round(fat*9/recCal*100)}% of intake</div>
+    <div style="background:var(--surface2);border:1px solid rgba(240,184,48,.25);border-radius:9px;padding:13px;text-align:center">
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;font-weight:700;color:var(--warn)">${fat}g</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px">Fat · ${fat*9} kcal</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--ink3);margin-top:2px">${Math.round(fat*9/recCal*100)}% of intake</div>
     </div>`;
   document.getElementById('macro-strip').innerHTML=`
     <div style="background:var(--pink);width:${Math.round(prot*4/recCal*100)}%"></div>
     <div style="background:var(--blue-lt);width:${Math.round(carbs*4/recCal*100)}%"></div>
     <div style="background:var(--yellow);flex:1"></div>`;
   document.getElementById('macro-note').innerHTML=`
-    📐 <strong style="color:var(--text)">Protein formula:</strong> 2.0g × ${ckg}kg = ${prot}g (Morton et al. 2018)<br>
-    📐 <strong style="color:var(--text)">Fat minimum:</strong> 0.7g/kg = ${fat}g (hormonal health, fat-soluble vitamins)<br>
-    📐 <strong style="color:var(--text)">Deficit target:</strong> ${myTDEE-recCal} kcal/day → ~0.7 kg/wk fat loss<br>
-    📐 <strong style="color:var(--text)">Total:</strong> ${recCal.toLocaleString()} kcal/day`;
+    📐 <strong style="color:var(--ink)">Protein formula:</strong> 2.0g × ${ckg}kg = ${prot}g (Morton et al. 2018)<br>
+    📐 <strong style="color:var(--ink)">Fat minimum:</strong> 0.7g/kg = ${fat}g (hormonal health, fat-soluble vitamins)<br>
+    📐 <strong style="color:var(--ink)">Deficit target:</strong> ${myTDEE-recCal} kcal/day → ~0.7 kg/wk fat loss<br>
+    📐 <strong style="color:var(--ink)">Total:</strong> ${recCal.toLocaleString()} kcal/day`;
 
   const meals=[
     {t:'07:00',n:'Breakfast',d:'30–40g protein. Eggs, Greek yoghurt, oats. Initiates MPS after overnight fast.',c:Math.round(recCal*.22)},
@@ -1275,28 +1918,28 @@ function buildNutrition(){
     {t:'16:00',n:'Afternoon Meal',d:'Lean protein + veg. Slow-digest keeps amino acids available.',c:Math.round(recCal*.18)},
     {t:'19:30',n:'Dinner',d:'High protein, moderate fat, lower carbs. Casein from cottage cheese.',c:Math.round(recCal*.19)},
   ];
-  document.getElementById('meal-grid').innerHTML=meals.map(m=>`<div style="background:var(--s3);border:1px solid var(--border);border-radius:9px;padding:11px">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue-lt);margin-bottom:3px">${m.t}</div>
-    <div style="font-family:'Noto Serif',serif;font-size:12px;font-weight:600;color:#fff;margin-bottom:4px">${m.n}</div>
-    <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);line-height:1.55">${m.d}</div>
-    ${m.c?`<div style="font-family:'Roboto',sans-serif;font-size:11px;color:var(--yellow);margin-top:5px">~${m.c} kcal</div>`:`<div style="font-size:11px;color:var(--green-lt);margin-top:5px">🔥 Train</div>`}
+  document.getElementById('meal-grid').innerHTML=meals.map(m=>`<div style="background:var(--surface2);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:11px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);margin-bottom:3px">${m.t}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:12px;font-weight:600;color:#fff;margin-bottom:4px">${m.n}</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);line-height:1.55">${m.d}</div>
+    ${m.c?`<div style="font-family:'Poppins',sans-serif;font-size:11px;color:var(--warn);margin-top:5px">~${m.c} kcal</div>`:`<div style="font-size:11px;color:var(--ok);margin-top:5px">🔥 Train</div>`}
   </div>`).join('');
 
   const supps=[
     {n:'Creatine Monohydrate',d:'5g/day. Strongest evidence. Preserves strength on cut.',e:'A'},
-    {n:'Whey Protein',d:'Convenience to hit daily target. Not magic — just protein.',e:'A'},
+    {n:'Whey Protein',d:'Convenience to hit daily target. Not magic - just protein.',e:'A'},
     {n:'Caffeine',d:'3–5mg/kg pre-workout. Improves output + fat oxidation. Cycle monthly.',e:'A'},
     {n:'Vitamin D3 + K2',d:'Common deficiency. Supports testosterone, immunity, bones.',e:'B'},
     {n:'Omega-3 Fish Oil',d:'2–4g EPA/DHA. Anti-inflammatory, supports MPS.',e:'B'},
     {n:'Magnesium Glycinate',d:'Improves sleep quality and recovery. Most are deficient.',e:'B'},
   ];
   const eC={'A':'var(--green-lt)','B':'var(--blue-lt)'};
-  document.getElementById('supp-grid').innerHTML=supps.map(s=>`<div style="background:var(--s3);border:1px solid var(--border);border-radius:9px;padding:11px">
+  document.getElementById('supp-grid').innerHTML=supps.map(s=>`<div style="background:var(--surface2);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:11px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-      <div style="font-family:'Noto Serif',serif;font-size:11px;font-weight:600;color:#fff">${s.n}</div>
-      <div style="font-family:'Roboto',sans-serif;font-size:9px;font-weight:500;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.3);color:${eC[s.e]}">${s.e}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:11px;font-weight:600;color:#fff">${s.n}</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:9px;font-weight:500;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.3);color:${eC[s.e]}">${s.e}</div>
     </div>
-    <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);line-height:1.55">${s.d}</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);line-height:1.55">${s.d}</div>
   </div>`).join('');
 }
 
@@ -1309,9 +1952,9 @@ function buildRings(){
   const bfL=Math.max(0,+(P.startBF-estBF(ckg)).toFixed(1));
   const rings=[
     {label:'Weight Lost',     cur:lost, total:17,   unit:'kg', col:'#3A6FD8', note:`${(17-lost).toFixed(1)} kg remaining`},
-    {label:'BF% Reduced',    cur:bfL,  total:11.5, unit:'%',  col:'#F0B830', note:`${(11.5-bfL).toFixed(1)}% remaining`},
-    {label:'Weeks Done',     cur:cw,   total:24,   unit:'wk', col:'#1A7A45', note:`${24-cw} weeks left`},
-    {label:'Goal Progress',  cur:Math.min(100,Math.round(lost/17*100)),total:100,unit:'%',col:'#F2A7C3',note:'Keep going!'},
+    {label:'BF% Reduced',    cur:bfL,  total:11.5, unit:'%',  col:'#FFD84A', note:`${(11.5-bfL).toFixed(1)}% remaining`},
+    {label:'Weeks Done',     cur:cw,   total:24,   unit:'wk', col:'#C9F63A', note:`${24-cw} weeks left`},
+    {label:'Goal Progress',  cur:Math.min(100,Math.round(lost/17*100)),total:100,unit:'%',col:'#F8BCE0',note:'Keep going!'},
   ];
   document.getElementById('ring-grid').innerHTML=rings.map(r=>{
     const pct=Math.min(1,r.cur/r.total);const circ=2*Math.PI*30;const off=circ*(1-pct);
@@ -1325,20 +1968,20 @@ function buildRings(){
         <div class="rlabel"><span class="rv" style="color:${r.col}">${Math.round(pct*100)}%</span><span class="rl">done</span></div>
       </div>
       <div>
-        <div style="font-family:'Noto Serif',serif;font-size:22px;font-weight:700;color:#fff">${r.cur}${r.unit}</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:2px">of ${r.total}${r.unit}</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:3px">${r.note}</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:22px;font-weight:700;color:var(--ink)">${r.cur}${r.unit}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);margin-top:2px">of ${r.total}${r.unit}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);margin-top:3px">${r.note}</div>
       </div>
     </div></div>`;
   }).join('');
 
   const milestones=[
-    {kg:90,label:'Cross 90 kg — face and neck visibly slimmer',week:5},
-    {kg:87,label:'Under 87 kg — gym regulars notice',week:8},
-    {kg:85,label:'Under 85 kg — upper body definition emerging',week:12},
-    {kg:82,label:'Under 82 kg — strangers comment',week:14},
-    {kg:80,label:'Under 80 kg — V-taper visible, upper abs showing',week:18},
-    {kg:77,label:'🏆 GOAL — 77 kg, ~16.5% BF',week:24},
+    {kg:90,label:'Cross 90 kg - face and neck visibly slimmer',week:5},
+    {kg:87,label:'Under 87 kg - gym regulars notice',week:8},
+    {kg:85,label:'Under 85 kg - upper body definition emerging',week:12},
+    {kg:82,label:'Under 82 kg - strangers comment',week:14},
+    {kg:80,label:'Under 80 kg - V-taper visible, upper abs showing',week:18},
+    {kg:77,label:'🏆 GOAL - 77 kg, ~16.5% BF',week:24},
   ];
   document.getElementById('milestone-list').innerHTML=milestones.map(m=>{
     const done=currKg()<=m.kg;
@@ -1347,125 +1990,170 @@ function buildRings(){
         ${done?'✓':''}
       </div>
       <div style="flex:1">
-        <div style="font-family:'Noto Serif',serif;font-size:12px;font-weight:600;color:${done?'#fff':'var(--sub)'}">${m.label}</div>
-        <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:2px">Target: Week ${m.week} ${done?'<span style="color:var(--green-lt)">● reached</span>':''}</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:12px;font-weight:600;color:${done?'#fff':'var(--sub)'}">${m.label}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);margin-top:2px">Target: Week ${m.week} ${done?'<span style="color:var(--ok)">● reached</span>':''}</div>
       </div>
-      <div style="font-family:'Noto Serif',serif;font-size:20px;font-weight:700;color:${done?'var(--green-lt)':'var(--blue-lt)'}">${m.kg}kg</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:20px;font-weight:700;color:${done?'var(--green-lt)':'var(--blue-lt)'}">${m.kg}kg</div>
     </div>`;
   }).join('');
 
   const phases=[
     {n:'Ignition',  wks:'1–4',  col:'var(--blue)',    d:'Water loss, adaptation begins'},
     {n:'Momentum',  wks:'5–8',  col:'var(--blue-lt)', d:'Real fat burning dominant'},
-    {n:'The Grind', wks:'9–12', col:'var(--yellow)',  d:'Plateau risk — push through'},
+    {n:'The Grind', wks:'9–12', col:'var(--yellow)',  d:'Plateau risk - push through'},
     {n:'Visible',   wks:'13–17',col:'var(--olive)',   d:'Others notice the change'},
     {n:'The Reveal',wks:'18–21',col:'var(--green-lt)',d:'Athletic physique emerges'},
     {n:'Goal 🏆',  wks:'22–24',col:'var(--pink)',    d:'Transition to maintenance'},
   ];
-  document.getElementById('phase-grid').innerHTML=phases.map(ph=>`<div style="background:var(--s2);border:1px solid ${ph.col}44;border-radius:10px;padding:12px">
-    <div style="font-family:'Noto Serif',serif;font-size:12px;font-weight:600;color:${ph.col}">${ph.n}</div>
-    <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:2px">Weeks ${ph.wks}</div>
-    <div style="font-family:'Roboto',sans-serif;font-size:10px;color:var(--sub);margin-top:4px;line-height:1.4">${ph.d}</div>
+  document.getElementById('phase-grid').innerHTML=phases.map(ph=>`<div style="background:var(--surface);border:1px solid ${ph.col}44;border-radius:10px;padding:12px">
+    <div style="font-family:'Fredoka One',cursive;font-size:12px;font-weight:600;color:${ph.col}">${ph.n}</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);margin-top:2px">Weeks ${ph.wks}</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:10px;color:var(--ink3);margin-top:4px;line-height:1.4">${ph.d}</div>
   </div>`).join('');
 }
 
 /* ════════════════════════════════════
-   SCIENCE — real-time with sources + links
+   SCIENCE - real-time with sources + links
 ════════════════════════════════════ */
 function buildScience(){
-  const el=document.getElementById('science-content');
-  // Always fully rebuild — values update with logged weight
-  const ckg=currKg(), rate=avgRate();
-  const prot=Math.round(ckg*2.0);
-  const curTDEE=tdee(ckg);
-  const targetTDEE=tdee(P.goalKg);
+  const el = document.getElementById('science-content');
+  const ckg = currKg();
+  const rate = avgRate();
+  const prot = Math.round(ckg * 2.0);
+  const curTDEE = tdee(ckg);
+  const targetTDEE = tdee(P.goalKg);
 
-  const sections=[
+  const sections = [
     {
-      icon:'⚖️',title:'Why 0.5–1.0 kg/week Is the Optimal Loss Rate',
-      body:`Losing more than 1% of body weight per week significantly increases lean muscle loss. At your current weight of <strong style="color:#fff">${ckg} kg</strong>, that means a ceiling of <strong style="color:#fff">${(ckg*0.01).toFixed(1)} kg/wk</strong>. Losing below 0.3 kg/wk indicates near-maintenance intake with negligible fat change. The 0.5–1.0 kg/wk window delivers meaningful fat loss while preserving lean mass and training performance.<br><br>
-      ${rate!==null?`<strong style="color:#fff">Your current rate: ${rate} kg/wk (3-week avg)</strong> — ${rate>=0.5&&rate<=1.0?'<span style="color:var(--green-lt)">✓ Optimal zone</span>':rate<0?'<span style="color:#ff8070">⚠ Gaining weight</span>':rate<0.5?'<span style="color:var(--yellow)">⚠ Below minimum — increase deficit slightly</span>':'<span style="color:var(--yellow)">⚡ Too fast — add 100–150 kcal/day</span>'}`:
-      'Log 2+ weeks to see your personalised rate assessment here.'}`,
-      refs:[
-        {label:'Helms et al. 2014 — Evidence-based recommendations for natural bodybuilding contest preparation',url:'https://pubmed.ncbi.nlm.nih.gov/24864135/'},
-        {label:'Barakat et al. 2020 — Body recomposition: Can trained individuals build muscle and lose fat?',url:'https://pubmed.ncbi.nlm.nih.gov/32588299/'},
+      title: 'Optimal Rate of Fat Loss During a Calorie Deficit',
+      summary: 'The central question in fat-loss programming is how fast to lose weight without sacrificing muscle. The evidence consistently points to 0.5–1.0% of body weight per week as the safe upper limit. Beyond this, lean mass losses accelerate substantially. Helms et al. (2014) reviewed natural bodybuilding preparation and found that rates above 1% bodyweight/week were associated with significant muscle loss even when training and protein were controlled. Barakat et al. (2020) confirmed in a systematic review that trained individuals can lose fat and preserve or even gain muscle simultaneously at moderate deficits — what is commonly called body recomposition. The key conditions are adequate protein, consistent resistance training, and a deficit no greater than 500–700 kcal/day.',
+      personalised: rate !== null
+        ? (rate >= 0.5 && rate <= 1.0
+            ? `Your current rate of ${rate} kg/wk is within the optimal range. Continue at current intake.`
+            : rate < 0
+            ? `Your weight is increasing (+${Math.abs(rate)} kg/wk). You are likely in a surplus. Audit hidden calories and reduce intake by 200–300 kcal/day.`
+            : rate < 0.5
+            ? `Your rate of ${rate} kg/wk is below the minimum. Consider reducing intake by 100–150 kcal or adding daily walking.`
+            : `Your rate of ${rate} kg/wk exceeds 1.0 kg/wk. This risks muscle loss. Add 100–150 kcal/day from protein and carbs.`)
+        : null,
+      papers: [
+        { authors: 'Helms, E.R., Aragon, A.A., & Fitschen, P.J.', year: '2014', title: 'Evidence-based recommendations for natural bodybuilding contest preparation: nutrition and supplementation', journal: 'Journal of the International Society of Sports Nutrition, 11(1)', doi: '10.1186/1550-2783-11-20', url: 'https://pubmed.ncbi.nlm.nih.gov/24864135/' },
+        { authors: 'Barakat, C., et al.', year: '2020', title: 'Body Recomposition: Can Trained Individuals Build Muscle and Lose Fat at the Same Time?', journal: 'Strength & Conditioning Journal, 42(5), 7–21', doi: '10.1519/SSC.0000000000000584', url: 'https://pubmed.ncbi.nlm.nih.gov/32588299/' },
+        { authors: 'Garthe, I., Raastad, T., Refsnes, P.E., Koivisto, A., & Sundgot-Borgen, J.', year: '2011', title: 'Effect of two different weight-loss rates on body composition and strength and power-related performance in elite athletes', journal: 'International Journal of Sport Nutrition and Exercise Metabolism, 21(2), 97–104', doi: '10.1123/ijsnem.21.2.97', url: 'https://pubmed.ncbi.nlm.nih.gov/21558571/' },
       ]
     },
     {
-      icon:'🔬',title:'Metabolic Adaptation — Why Your TDEE Drops Over Time',
-      body:`As you lose weight, your TDEE falls for two distinct reasons:<br><br>
-      <strong style="color:#fff">1. Lower body mass</strong> — less metabolically active tissue. Your TDEE at <strong style="color:#fff">${ckg} kg</strong> is ~<strong style="color:#fff">${curTDEE.toLocaleString()} kcal</strong>. At goal weight (${P.goalKg} kg) it will be ~<strong style="color:#fff">${targetTDEE.toLocaleString()} kcal</strong> — a reduction of <strong style="color:#fff">${curTDEE-targetTDEE} kcal</strong>.<br><br>
-      <strong style="color:#fff">2. Adaptive thermogenesis</strong> — the body downregulates non-exercise spontaneous activity (NEAT) in a prolonged deficit, cutting TDEE an additional 5–10% beyond body weight alone. This tracker recalculates your TDEE weekly using Mifflin-St Jeor.`,
-      refs:[
-        {label:'Rosenbaum & Leibel 2010 — Adaptive thermogenesis in humans',url:'https://pubmed.ncbi.nlm.nih.gov/20935667/'},
-        {label:'Müller et al. 2013 — Mifflin-St Jeor equation validation',url:'https://pubmed.ncbi.nlm.nih.gov/23097674/'},
+      title: 'Protein Requirements During a Calorie Deficit',
+      summary: `Protein is the single most important dietary variable for preserving lean mass during a cut. Morton et al. (2018) conducted a meta-analysis of 49 randomised controlled trials involving 1,863 participants and found that protein supplementation significantly increased muscle mass and strength, with gains plateauing at approximately 1.62 g/kg/day in a neutral energy state. However, during a calorie deficit, requirements are higher. Stokes et al. (2018) demonstrated that intakes of 1.8–2.7 g/kg/day minimised lean mass losses compared to lower intakes. The thermic effect of protein (25–30% of its caloric content is spent on digestion) also makes it metabolically advantageous during a cut. At your current weight of ${ckg} kg, the tracker targets ${prot}g/day (2.0 g/kg), which sits comfortably within the evidence-supported range.`,
+      personalised: null,
+      papers: [
+        { authors: 'Morton, R.W., et al.', year: '2018', title: 'A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults', journal: 'British Journal of Sports Medicine, 52(6), 376–384', doi: '10.1136/bjsports-2017-097608', url: 'https://pubmed.ncbi.nlm.nih.gov/28698222/' },
+        { authors: 'Stokes, T., Hector, A.J., Morton, R.W., McGlory, C., & Phillips, S.M.', year: '2018', title: 'Recent Perspectives Regarding the Role of Dietary Protein for the Promotion of Muscle Hypertrophy with Resistance Exercise Training', journal: 'Nutrients, 10(2), 180', doi: '10.3390/nu10020180', url: 'https://pubmed.ncbi.nlm.nih.gov/29414855/' },
+        { authors: 'Phillips, S.M., & Van Loon, L.J.C.', year: '2011', title: 'Dietary protein for athletes: From requirements to optimum adaptation', journal: 'Journal of Sports Sciences, 29(S1), S29–S38', doi: '10.1080/02640414.2011.619204', url: 'https://pubmed.ncbi.nlm.nih.gov/21917858/' },
+        { authors: 'Witard, O.C., Jackman, S.R., Breen, L., Smith, K., Selby, A., & Tipton, K.D.', year: '2014', title: 'Myofibrillar muscle protein synthesis rates subsequent to a meal in response to small and large bolus doses of dairy protein', journal: 'American Journal of Clinical Nutrition, 99(1), 86–95', doi: '10.3945/ajcn.112.055517', url: 'https://pubmed.ncbi.nlm.nih.gov/24257722/' },
       ]
     },
     {
-      icon:'🥩',title:'Protein — The Non-Negotiable Macro',
-      body:`The landmark Morton et al. 2018 meta-analysis of 49 randomised trials found optimal protein at ~1.62 g/kg for muscle gain in trained individuals. During a calorie deficit, requirements rise to <strong style="color:#fff">1.8–2.4 g/kg</strong>.<br><br>
-      At your current weight of <strong style="color:#fff">${ckg} kg</strong>, your target is <strong style="color:#fff">${prot}g/day</strong> (2.0 g/kg).<br><br>
-      <strong style="color:#fff">Why protein matters on a cut:</strong> preserves lean mass via muscle protein synthesis (MPS); highest thermic effect of food (25–30% of calories burned digesting it); most satiating macro; prevents strength loss in the gym.`,
-      refs:[
-        {label:'Morton et al. 2018 — A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass',url:'https://pubmed.ncbi.nlm.nih.gov/28698222/'},
-        {label:'Phillips & Van Loon 2011 — Dietary protein for athletes: from requirements to optimum adaptation',url:'https://pubmed.ncbi.nlm.nih.gov/21917858/'},
+      title: 'Metabolic Adaptation and the Mifflin-St Jeor Equation',
+      summary: `Total Daily Energy Expenditure (TDEE) is not static. As body mass decreases, basal metabolic rate falls proportionally. More importantly, Rosenbaum & Leibel (2010) documented a phenomenon called adaptive thermogenesis — the body's deliberate reduction of non-exercise activity thermogenesis (NEAT) during a sustained deficit, which can suppress TDEE by 5–10% beyond what body weight changes alone would predict. This is why fat loss often slows unexpectedly after several weeks. The Mifflin-St Jeor equation, validated by Frankenfield et al. (2005) as the most accurate formula for estimating BMR in overweight and obese populations, underpins the TDEE calculations in this tracker. At your current weight of ${ckg} kg, your estimated TDEE is ${curTDEE.toLocaleString()} kcal. At goal weight (${P.goalKg} kg) it will be approximately ${targetTDEE.toLocaleString()} kcal — a reduction of ${curTDEE - targetTDEE} kcal that must be accounted for as you progress.`,
+      personalised: null,
+      papers: [
+        { authors: 'Rosenbaum, M., & Leibel, R.L.', year: '2010', title: 'Adaptive thermogenesis in humans', journal: 'International Journal of Obesity, 34(S1), S47–S55', doi: '10.1038/ijo.2010.184', url: 'https://pubmed.ncbi.nlm.nih.gov/20935667/' },
+        { authors: 'Frankenfield, D., Roth-Yousey, L., & Compher, C.', year: '2005', title: 'Comparison of predictive equations for resting metabolic rate in healthy nonobese and obese adults: a systematic review', journal: 'Journal of the American Dietetic Association, 105(5), 775–789', doi: '10.1016/j.jada.2005.02.005', url: 'https://pubmed.ncbi.nlm.nih.gov/15883556/' },
+        { authors: 'Hall, K.D., et al.', year: '2012', title: 'Quantification of the effect of energy imbalance on bodyweight', journal: 'The Lancet, 378(9793), 826–837', doi: '10.1016/S0140-6736(11)60812-X', url: 'https://pubmed.ncbi.nlm.nih.gov/21872751/' },
       ]
     },
     {
-      icon:'🏋️',title:'Progressive Overload During a Cut',
-      body:`Reducing training intensity while cutting is the most common and costly mistake. Research consistently shows maintaining (or increasing) training load is the primary stimulus for muscle retention — not calories.<br><br>
-      <strong style="color:#fff">Your split (Chest+Tris / Bis+Back / Shoulders+Legs, 6×/week)</strong> hits each muscle group twice weekly — research supports this as optimal for both hypertrophy and retention. Volume (sets) can be reduced 20–30% if recovery suffers, but never sacrifice intensity (load).<br><br>
-      A planned deload every 6–8 weeks reduces cortisol accumulation and prevents overreaching.`,
-      refs:[
-        {label:'Schoenfeld et al. 2016 — Effects of resistance training frequency on measures of muscle hypertrophy: A systematic review and meta-analysis',url:'https://pubmed.ncbi.nlm.nih.gov/27102172/'},
-        {label:'Ralston et al. 2017 — The effect of load and volume autoregulation on muscular strength and hypertrophy',url:'https://pubmed.ncbi.nlm.nih.gov/29058188/'},
+      title: 'Resistance Training Frequency and Volume for Muscle Retention',
+      summary: 'The primary signal for muscle retention during a calorie deficit is mechanical loading — lifting heavy weights with sufficient intensity. Schoenfeld, Ogborn, & Krieger (2016) conducted a meta-analysis of 25 studies and found that training each muscle group twice per week produced significantly greater hypertrophic outcomes than once per week, with a dose-response relationship suggesting higher frequencies may provide additional benefit. Your current split (Chest/Tris, Back/Bis, Shoulders/Legs, 6 sessions per week) hits each major muscle group twice weekly — consistent with optimal frequency. Ralston et al. (2017) found that auto-regulating volume while maintaining intensity preserved strength better during short-term energy restriction. The critical principle: you can reduce volume (number of sets) when recovering poorly, but you must never reduce load (the weight on the bar). Intensity is the muscle retention signal.',
+      personalised: null,
+      papers: [
+        { authors: 'Schoenfeld, B.J., Ogborn, D., & Krieger, J.W.', year: '2016', title: 'Effects of Resistance Training Frequency on Measures of Muscle Hypertrophy: A Systematic Review and Meta-Analysis', journal: 'Sports Medicine, 46(11), 1689–1697', doi: '10.1007/s40279-016-0543-8', url: 'https://pubmed.ncbi.nlm.nih.gov/27102172/' },
+        { authors: 'Ralston, G.W., Kilgore, L., Wyatt, F.B., & Baker, J.S.', year: '2017', title: 'The effect of load and volume autoregulation on muscular strength and hypertrophy', journal: 'Sports Medicine, 47(12), 2585–2601', doi: '10.1007/s40279-017-0762-1', url: 'https://pubmed.ncbi.nlm.nih.gov/29058188/' },
+        { authors: 'Schoenfeld, B.J., Grgic, J., Ogborn, D., & Krieger, J.W.', year: '2017', title: 'Strength and Hypertrophy Adaptations Between Low- vs. High-Load Resistance Training: A Systematic Review and Meta-analysis', journal: 'Journal of Strength and Conditioning Research, 31(12), 3508–3523', doi: '10.1519/JSC.0000000000002200', url: 'https://pubmed.ncbi.nlm.nih.gov/28834797/' },
       ]
     },
     {
-      icon:'💧',title:'Water Weight vs Real Fat Loss — Understanding the Scale',
-      body:`Each gram of stored glycogen holds approximately 3g of water. In a calorie deficit, glycogen depletes first — a 400g glycogen reduction produces ~1.5 kg on the scale with zero fat lost. This explains dramatic week 1–2 drops.<br><br>
-      By weeks 3–4, glycogen has equilibrated and real fat oxidation dominates. This tracker uses a 3-week rolling average (currently: <strong style="color:#fff">${rate!==null?rate+' kg/wk':'not yet calculated'}</strong>) to smooth out these fluctuations and give you a true signal.`,
-      refs:[
-        {label:'Tarnopolsky et al. 2001 — Carbohydrate loading and metabolism during exercise in men and women',url:'https://pubmed.ncbi.nlm.nih.gov/11255736/'},
-        {label:'Hall et al. 2012 — Quantification of the effect of energy imbalance on bodyweight',url:'https://pubmed.ncbi.nlm.nih.gov/21872751/'},
+      title: 'Glycogen, Water Weight, and Scale Interpretation',
+      summary: `The body stores approximately 400–500g of glycogen in muscle and liver tissue, and each gram binds approximately 3–4g of water. When you begin a calorie deficit, glycogen is the first fuel depleted, producing a rapid loss of 1.5–3 kg on the scale within the first 7–14 days. This is not fat — it is water. Hall et al. (2012) modelled energy imbalance and body composition change and found that 1 kg of actual fat loss requires a cumulative deficit of approximately 7,700 kcal. Tarnopolsky et al. (2001) documented the glycogen storage dynamics in detail. The practical implication is that weeks 1–2 will show dramatic scale drops that overestimate fat loss, and weeks 3–4 will show slower drops that underestimate it. This tracker uses a 3-week rolling average${rate !== null ? ` (currently ${rate} kg/wk)` : ''} to smooth these glycogen-driven fluctuations and surface the true underlying fat-loss signal.`,
+      personalised: null,
+      papers: [
+        { authors: 'Hall, K.D., Sacks, G., Chandramohan, D., Chow, C.C., Wang, Y.C., Gortmaker, S.L., & Swinburn, B.A.', year: '2011', title: 'Quantification of the effect of energy imbalance on bodyweight', journal: 'The Lancet, 378(9793), 826–837', doi: '10.1016/S0140-6736(11)60812-X', url: 'https://pubmed.ncbi.nlm.nih.gov/21872751/' },
+        { authors: 'Tarnopolsky, M.A., Zawada, C., Richmond, L.B., Carter, S., Shearer, J., Graham, T., & Phillips, S.M.', year: '2001', title: 'Gender differences in carbohydrate loading are related to energy intake', journal: 'Journal of Applied Physiology, 91(1), 225–230', doi: '10.1152/jappl.2001.91.1.225', url: 'https://pubmed.ncbi.nlm.nih.gov/11408435/' },
+        { authors: 'Antonio, J., & Street, C.', year: '1999', title: 'Glutamine: a potentially useful supplement for athletes', journal: 'Canadian Journal of Applied Physiology, 24(1), 1–14', doi: '10.1139/h99-001', url: 'https://pubmed.ncbi.nlm.nih.gov/9916176/' },
       ]
     },
     {
-      icon:'😴',title:'Sleep, Cortisol & Fat Retention',
-      body:`The Stanford study by Spiegel et al. showed that reducing sleep from 8 to 5 hours increased ghrelin (hunger hormone) by 14.9% and decreased leptin (satiety signal) by 15.5%. This dramatically increases adherence difficulty.<br><br>
-      Poor sleep also elevates cortisol chronically, promoting visceral fat storage and muscle catabolism — directly opposing your recomp goals.<br><br>
-      <strong style="color:#fff">Targets:</strong> 7–9 hours/night, consistent sleep/wake times, no caffeine after 2PM, room temperature 18–19°C.`,
-      refs:[
-        {label:'Spiegel et al. 2004 — Sleep curtailment in healthy young men is associated with decreased leptin levels, elevated ghrelin levels, and increased hunger and appetite',url:'https://pubmed.ncbi.nlm.nih.gov/15583226/'},
-        {label:'Dattilo et al. 2011 — Sleep and muscle recovery: endocrinological and molecular basis for a new and promising hypothesis',url:'https://pubmed.ncbi.nlm.nih.gov/21550729/'},
+      title: 'Sleep, Hormones, and Body Composition',
+      summary: 'Sleep is arguably the most underrated lever in fat loss and muscle retention. Spiegel et al. (2004) demonstrated that restricting sleep to 5 hours per night for just one week increased ghrelin (the hunger-stimulating hormone) by 14.9% and decreased leptin (the satiety hormone) by 15.5% — mechanistically driving increased appetite and reduced dietary adherence. Leproult & Van Cauter (2011) showed that one week of sleep restriction to 5 hours per night reduced testosterone levels in young healthy men by 10–15%. Since testosterone is the primary anabolic hormone driving muscle protein synthesis, this directly undermines muscle retention during a cut. Dattilo et al. (2011) proposed the hormonal mechanisms by which sleep deprivation promotes catabolism via cortisol elevation. Elevated cortisol promotes visceral fat storage, increases muscle protein breakdown, and suppresses growth hormone release — all directly opposing body recomposition goals. Target 7–9 hours per night, maintain consistent sleep and wake times, and avoid caffeine after 2PM.',
+      personalised: null,
+      papers: [
+        { authors: 'Spiegel, K., Tasali, E., Penev, P., & Van Cauter, E.', year: '2004', title: 'Sleep curtailment in healthy young men is associated with decreased leptin levels, elevated ghrelin levels, and increased hunger and appetite', journal: 'Annals of Internal Medicine, 141(11), 846–850', doi: '10.7326/0003-4819-141-11-200412070-00008', url: 'https://pubmed.ncbi.nlm.nih.gov/15583226/' },
+        { authors: 'Leproult, R., & Van Cauter, E.', year: '2011', title: 'Effect of 1 week of sleep restriction on testosterone levels in young healthy men', journal: 'JAMA, 305(21), 2173–2174', doi: '10.1001/jama.2011.710', url: 'https://pubmed.ncbi.nlm.nih.gov/21632481/' },
+        { authors: 'Dattilo, M., et al.', year: '2011', title: 'Sleep and muscle recovery: endocrinological and molecular basis for a new and promising hypothesis', journal: 'Medical Hypotheses, 77(2), 220–222', doi: '10.1016/j.mehy.2011.04.017', url: 'https://pubmed.ncbi.nlm.nih.gov/21550729/' },
       ]
     },
     {
-      icon:'📐',title:'Body Fat % Estimation — Methods & Accuracy',
-      body:`This tracker estimates body fat using proportional interpolation: tracking your movement from ${P.startBF}% (start) to ${P.goalBF}% (goal) based on actual weight loss, assuming protein-adequate fat-centric loss.<br><br>
-      <strong style="color:#fff">Current estimate: ${estBF(ckg)}%</strong><br><br>
-      <strong style="color:#fff">More accurate options (ranked):</strong><br>
-      1. DEXA scan — gold standard, ~€50, repeat every 8–12 weeks<br>
-      2. Navy tape method (neck + waist + height) — free, validated<br>
-      3. 3-site Jackson-Pollock calipers — good with practice<br><br>
-      Note: BF% fluctuates ±1–2% with hydration and glycogen — always track trends over 4+ weeks.`,
-      refs:[
-        {label:'Durnin & Womersley 1974 — Body fat assessed from total body density and its estimation from skinfold thickness',url:'https://pubmed.ncbi.nlm.nih.gov/4843734/'},
-        {label:'Ode et al. 2007 — Body mass index as a predictor of percent fat in college athletes and nonathletes',url:'https://pubmed.ncbi.nlm.nih.gov/17313290/'},
+      title: 'Creatine Monohydrate During a Cut',
+      summary: 'Creatine monohydrate is the most extensively researched ergogenic supplement available, with over 1,000 published studies. During a calorie deficit, creatine plays a particularly important role: it buffers the ATP-PCr energy system, enabling higher training intensity even when glycogen stores are partially depleted. Lanhers et al. (2017) conducted a meta-analysis of 22 studies confirming significant improvements in upper body strength with creatine supplementation. Branch (2003) reviewed 300 studies and found consistent performance benefits across strength, power, and body composition. Critically, creatine supplementation during a cut allows you to maintain workout intensity even as your calorie intake is reduced — preserving the primary mechanical signal for muscle retention. The standard protocol is 3–5g per day indefinitely, with no loading phase required. Note that creatine causes a 1–2 kg increase in scale weight from water retention in muscle — this is desirable (it stays inside muscle cells) and not fat.',
+      personalised: null,
+      papers: [
+        { authors: 'Lanhers, C., Pereira, B., Naughton, G., Trousselard, M., Lesage, F.X., & Dutheil, F.', year: '2017', title: 'Creatine Supplementation and Upper Limb Strength Performance: A Systematic Review and Meta-Analysis', journal: 'Sports Medicine, 47(1), 163–173', doi: '10.1007/s40279-016-0571-4', url: 'https://pubmed.ncbi.nlm.nih.gov/27328852/' },
+        { authors: 'Branch, J.D.', year: '2003', title: 'Effect of creatine supplementation on body composition and performance: a meta-analysis', journal: 'International Journal of Sport Nutrition and Exercise Metabolism, 13(2), 198–226', doi: '10.1123/ijsnem.13.2.198', url: 'https://pubmed.ncbi.nlm.nih.gov/12945830/' },
+        { authors: 'Rawson, E.S., & Volek, J.S.', year: '2003', title: 'Effects of creatine supplementation and resistance training on muscle strength and weightlifting performance', journal: 'Journal of Strength and Conditioning Research, 17(4), 822–831', doi: '10.1519/1533-4287(2003)017', url: 'https://pubmed.ncbi.nlm.nih.gov/14636102/' },
+      ]
+    },
+    {
+      title: 'Body Fat Estimation Methods and Their Accuracy',
+      summary: `Body fat percentage is notoriously difficult to measure accurately outside of laboratory settings. The gold standard is DEXA (dual-energy X-ray absorptiometry), which uses differential X-ray attenuation to distinguish fat, lean, and bone mass, with an error margin of approximately 1–2%. The 3-site Jackson-Pollock skinfold caliper method, validated in the original 1978 and 1980 studies, achieves accuracy within 3–4% when performed consistently by a trained measurer. The US Navy tape method (using neck, waist, and height measurements) has been validated with an error of approximately 2.5–4%. This tracker uses a proportional interpolation model: assuming your loss progresses from the starting body fat (${P.startBF}%) to the goal (${P.goalBF}%), scaled linearly against your actual weight change. Current estimate: ${estBF(ckg)}%. All body fat methods share one critical limitation: readings fluctuate 1–2% daily with hydration status and glycogen levels. Always measure under identical conditions (same time, same hydration state) and track 4-week trends, not individual readings.`,
+      personalised: null,
+      papers: [
+        { authors: 'Jackson, A.S., & Pollock, M.L.', year: '1978', title: 'Generalized equations for predicting body density of men', journal: 'British Journal of Nutrition, 40(3), 497–504', doi: '10.1079/BJN19780152', url: 'https://pubmed.ncbi.nlm.nih.gov/718832/' },
+        { authors: 'Durnin, J.V.G.A., & Womersley, J.', year: '1974', title: 'Body fat assessed from total body density and its estimation from skinfold thickness: measurements on 481 men and women aged from 16 to 72 years', journal: 'British Journal of Nutrition, 32(1), 77–97', doi: '10.1079/BJN19740060', url: 'https://pubmed.ncbi.nlm.nih.gov/4843734/' },
+        { authors: 'Ode, J.J., Pivarnik, J.M., Reeves, M.J., & Knous, J.L.', year: '2007', title: 'Body mass index as a predictor of percent fat in college athletes and nonathletes', journal: 'Medicine & Science in Sports & Exercise, 39(3), 403–409', doi: '10.1249/01.mss.0000247008.19127.3e', url: 'https://pubmed.ncbi.nlm.nih.gov/17313290/' },
+      ]
+    },
+    {
+      title: 'Non-Exercise Activity Thermogenesis (NEAT) and Daily Steps',
+      summary: 'NEAT — the energy expended in all movement outside of formal exercise — is the most variable component of TDEE and the easiest to unknowingly suppress during a calorie deficit. Levine et al. (2005) found that NEAT accounted for the majority of the variance in fat gain between individuals in overfeeding studies, with differences of up to 2,000 kcal/day between lean and obese subjects. Critically, Leibel et al. (1995) documented that NEAT is reflexively suppressed during energy restriction — meaning the body unconsciously moves less when eating less, creating a compensatory reduction in calorie burn. Your daily target of 10,000–12,000 steps is a direct NEAT intervention. Church et al. (2011) demonstrated that step counts above 10,000 per day are associated with significantly better metabolic health markers. The combined effect of your 6-day training programme and sustained daily steps places your activity multiplier at approximately 1.725 — a genuinely high activity level that supports your calorie deficit while preserving training quality.',
+      personalised: null,
+      papers: [
+        { authors: 'Levine, J.A., Lanningham-Foster, L.M., McCrady, S.K., Krizan, A.C., Olson, L.R., Kane, P.H., Jensen, M.D., & Clark, M.M.', year: '2005', title: 'Interindividual variation in posture allocation: possible role in human obesity', journal: 'Science, 307(5709), 584–586', doi: '10.1126/science.1106561', url: 'https://pubmed.ncbi.nlm.nih.gov/15681386/' },
+        { authors: 'Leibel, R.L., Rosenbaum, M., & Hirsch, J.', year: '1995', title: 'Changes in energy expenditure resulting from altered body weight', journal: 'New England Journal of Medicine, 332(10), 621–628', doi: '10.1056/NEJM199503093321001', url: 'https://pubmed.ncbi.nlm.nih.gov/7632212/' },
+        { authors: 'Tudor-Locke, C., & Bassett, D.R.', year: '2004', title: 'How many steps/day are enough? Preliminary pedometer indices for public health', journal: 'Sports Medicine, 34(1), 1–8', doi: '10.2165/00007256-200434010-00001', url: 'https://pubmed.ncbi.nlm.nih.gov/14715035/' },
       ]
     },
   ];
 
-  el.innerHTML=sections.map(s=>`
-    <div class="card sci-card">
-      <div class="card-head"><span class="card-title">${s.icon} ${s.title}</span><span class="sci-tag">evidence-based</span></div>
-      <div class="card-body sci-body">
-        ${s.body}
-        <div class="sci-refs">
-          ${s.refs.map(r=>`<a class="sci-ref-tag" href="${r.url}" target="_blank" rel="noopener">📄 ${r.label}</a>`).join('')}
-        </div>
+  // Render — colour-coded accent per section, full paper cards
+  const accentCols = ['var(--sky)','var(--pink)','var(--lime)','var(--amber)','var(--sky)','var(--pink)','var(--lime)','var(--amber)','var(--sky)'];
+
+  el.innerHTML = sections.map((s, si) => {
+    const ac = accentCols[si % accentCols.length];
+    const personalBlock = s.personalised
+      ? `<div style="margin:14px 0;padding:11px 14px;background:rgba(255,255,255,.04);border-left:3px solid ${ac};border-radius:0 10px 10px 0;font-size:var(--fs-xs);color:var(--ink2);line-height:1.65"><strong style="color:var(--ink)">Your data:</strong> ${s.personalised}</div>`
+      : '';
+    const paperCards = s.papers.map(p => `
+      <a href="${p.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;background:var(--surface2);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:11px 14px;transition:border-color .2s" onmouseover="this.style.borderColor=accentCols && '${ac}'" onmouseout="this.style.borderColor='rgba(255,255,255,.07)'">
+        <div style="font-size:var(--fs-xs);color:${ac};font-weight:600;margin-bottom:3px">${p.authors} (${p.year})</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink);font-weight:500;line-height:1.4;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:var(--fs-2xs);color:var(--ink3);font-style:italic;margin-bottom:4px">${p.journal}</div>
+        <div style="font-size:var(--fs-2xs);color:${ac};opacity:.8">DOI: ${p.doi} ↗</div>
+      </a>`).join('');
+    return `
+    <div class="card sci-card" style="border-top:3px solid ${ac}">
+      <div class="card-head">
+        <span class="card-title">${s.title}</span>
+        <span class="sci-tag">${s.papers.length} paper${s.papers.length > 1 ? 's' : ''}</span>
       </div>
-    </div>`).join('');
+      <div class="card-body">
+        <div style="font-size:var(--fs-sm);color:var(--ink2);line-height:1.85;margin-bottom:${s.personalised || s.papers.length ? '14px' : '0'}">${s.summary}</div>
+        ${personalBlock}
+        ${s.papers.length ? `<div style="font-family:'Fredoka One',cursive;font-size:var(--fs-xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px">Peer-reviewed sources</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${paperCards}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ════════════════════════════════════
@@ -1535,73 +2223,14 @@ function goTab(name,btn){
 
 function refreshAll(){
   buildDashboard(); buildNutrition(); buildTimeline(); buildRings();
-  // Rebuild science so live values update
-  document.getElementById('science-content').innerHTML='';
   buildScience();
   const cp=document.getElementById('panel-charts');
   if(cp.classList.contains('on')) buildCharts();
 }
 
-/* ════════════════════════════════════
-   LATEST SCIENCE VIA ANTHROPIC API
-════════════════════════════════════ */
-async function fetchLatestScience(){
-  const btn=document.getElementById('sci-refresh-btn');
-  const fresh=document.getElementById('sci-freshness');
-  const news=document.getElementById('science-news');
-  if(btn)btn.textContent='⏳ Fetching...';
-  if(fresh)fresh.textContent='Contacting AI...';
-  news.innerHTML=`<div class="alert al-b" style="margin-bottom:0">🔄 Fetching latest fitness science headlines from AI...</div>`;
 
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:`You are a fitness science researcher. Give me 4 of the most recent and relevant research findings or developments in these areas: (1) fat loss / body recomposition, (2) protein intake for muscle preservation, (3) resistance training during a calorie deficit, (4) sleep and metabolic health. For each finding, write 2-3 sentences in plain English with a year (2023-2025 preferred). Format as JSON array: [{topic, headline, summary, year}]. Only JSON, no markdown.`
-        }]
-      })
-    });
-    const data=await res.json();
-    const text=data.content.map(i=>i.text||'').join('');
-    let items;
-    try{
-      const clean=text.replace(/\`\`\`json|\`\`\`/g,'').trim();
-      items=JSON.parse(clean);
-    }catch(e){
-      news.innerHTML=`<div class="alert al-y">⚠ Could not parse response. Raw: ${text.slice(0,200)}</div>`;
-      return;
-    }
-    const colours=['var(--blue-lt)','var(--green-lt)','var(--yellow)','var(--pink)'];
-    news.innerHTML=`
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:var(--space-sm);margin-bottom:4px">
-        ${items.map((it,i)=>`
-          <div style="background:var(--s3);border:1px solid ${colours[i%colours.length]}33;border-left:3px solid ${colours[i%colours.length]};border-radius:var(--card-radius);padding:var(--card-pad)">
-            <div style="font-family:'Roboto',sans-serif;font-size:var(--fs-xs);color:${colours[i%colours.length]};text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">${it.topic||'Research'} · ${it.year||'2025'}</div>
-            <div style="font-family:'Noto Serif',serif;font-size:var(--fs-sm);font-weight:600;color:#fff;margin-bottom:5px;line-height:1.3">${it.headline}</div>
-            <div style="font-family:'Roboto',sans-serif;font-size:var(--fs-xs);color:var(--sub);line-height:1.65">${it.summary}</div>
-          </div>`).join('')}
-      </div>`;
-    if(fresh)fresh.textContent='Updated '+(new Date().toLocaleTimeString());
-    if(btn)btn.textContent='🔄 Refresh Headlines';
-  }catch(e){
-    news.innerHTML=`<div class="alert al-r">⚠ Could not fetch latest science. Check connection. Showing static references below.</div>`;
-    if(btn)btn.textContent='🔄 Refresh Headlines';
-    if(fresh)fresh.textContent='Offline — static refs shown';
-    console.error(e);
-  }
-}
-
-/* ════════════════════════════════════
-   BOOT
-════════════════════════════════════ */
 buildLog(); buildTimeline(); buildDashboard(); buildNutrition(); buildScience();
-// Auto-fetch science on first load
-setTimeout(fetchLatestScience, 800);
+
 </script>
 </body>
 </html>
