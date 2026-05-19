@@ -405,38 +405,83 @@ body::before{
 .mbody{display:none}
 .mcard.open .mbody{display:block}
 
-/* Month icon row — responsive tiles */
-.m-icon-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
-@media(max-width:480px){
-  .m-icon-row{grid-template-columns:1fr 1fr}
-  .m-icon-cell:nth-child(1),.m-icon-cell:nth-child(2){border-bottom:1px solid var(--border)}
-  .m-icon-cell:nth-child(odd){border-right:1px solid var(--border)}
-  .m-icon-cell:nth-child(even){border-right:none}
+/* ════════ MONTH ICON ROW — fully fluid ════════ */
+/* 
+  Strategy: use 2-col on ALL phones (< 640px), 4-col on tablet+
+  vw-based sizes so everything scales to the actual screen width
+*/
+.m-icon-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--border);
+  width:100%;
 }
+
+/* Switch to 2×2 on any phone-sized screen */
+@media(max-width:640px){
+  .m-icon-row{grid-template-columns:1fr 1fr}
+  .m-icon-cell:nth-child(1),
+  .m-icon-cell:nth-child(2){border-bottom:1px solid var(--border)}
+  .m-icon-cell:nth-child(odd){border-right:1px solid var(--border) !important}
+  .m-icon-cell:nth-child(even){border-right:none !important}
+}
+
 .m-icon-cell{
   background:var(--surface);
-  padding:clamp(12px,2.5vw,18px) clamp(8px,1.8vw,14px);
+  /* padding scales with viewport so it never feels cramped */
+  padding:clamp(14px,3.5vw,20px) clamp(8px,2vw,14px);
   display:flex;flex-direction:column;align-items:center;
-  text-align:center;gap:5px;
+  text-align:center;gap:clamp(4px,1vw,7px);
   border-right:1px solid var(--border);
+  min-width:0; /* prevent overflow */
+  overflow:hidden;
 }
 .m-icon-cell:last-child{border-right:none}
+
+/* Icon square — min 40px on smallest phones */
 .m-icon-block{
-  width:clamp(38px,7vw,52px);height:clamp(38px,7vw,52px);
-  border-radius:clamp(10px,2vw,14px);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:clamp(40px,9vw,52px);
+  height:clamp(40px,9vw,52px);
+  border-radius:clamp(10px,2.5vw,14px);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
 }
+/* Scale the SVGs inside the icon block */
+.m-icon-block svg{
+  width:clamp(20px,5vw,26px);
+  height:clamp(20px,5vw,26px);
+}
+
 .ic-sky{background:var(--sky)}
 .ic-warn{background:var(--amber)}
 .ic-lime{background:var(--lime)}
 .ic-pink{background:var(--pink)}
-.ic-sky svg path,.ic-sky svg rect,.ic-sky svg circle,.ic-sky svg ellipse{fill:var(--sky-dk)}
+.ic-sky  svg path,.ic-sky  svg rect,.ic-sky  svg circle,.ic-sky  svg ellipse{fill:var(--sky-dk)}
 .ic-warn svg path,.ic-warn svg rect,.ic-warn svg circle,.ic-warn svg ellipse{fill:var(--lime-dk)}
 .ic-lime svg path,.ic-lime svg rect,.ic-lime svg circle,.ic-lime svg ellipse{fill:var(--lime-dk)}
 .ic-pink svg path,.ic-pink svg rect,.ic-pink svg circle,.ic-pink svg ellipse{fill:var(--pink-dk)}
-.m-icon-label{font-size:var(--fs-2xs);color:var(--ink3);text-transform:uppercase;letter-spacing:.09em;font-weight:600}
-.m-icon-value{font-family:'Fredoka One',cursive;font-size:clamp(14px,3vw,20px);color:var(--ink);line-height:1}
-.m-icon-sub{font-size:var(--fs-2xs);color:var(--ink3);line-height:1.4}
+
+.m-icon-label{
+  font-size:clamp(9px,2.2vw,11px);
+  color:var(--ink3);text-transform:uppercase;
+  letter-spacing:.07em;font-weight:600;
+  white-space:nowrap;
+}
+/* Value: the actual number — must be readable on phone */
+.m-icon-value{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(13px,3.8vw,19px);
+  color:var(--ink);line-height:1.1;
+  word-break:break-word;
+  /* on 2-col layout give it more room */
+  max-width:100%;
+}
+.m-icon-sub{
+  font-size:clamp(9px,2.2vw,11px);
+  color:var(--ink3);line-height:1.4;
+  word-break:break-word;
+  max-width:100%;
+}
 
 /* Look row */
 .look-row{
@@ -552,10 +597,7 @@ body::before{
   .msrow{grid-template-columns:1fr 1fr}
   .g4s{grid-template-columns:1fr 1fr}
   .look-row{grid-template-columns:64px 1fr}
-  .m-icon-row{grid-template-columns:1fr 1fr}
-  .m-icon-cell:nth-child(odd){border-right:1px solid var(--border)}
-  .m-icon-cell:nth-child(even){border-right:none}
-  .m-icon-cell:nth-child(1),.m-icon-cell:nth-child(2){border-bottom:1px solid var(--border)}
+
   .hero h1{white-space:normal}
   /* overflow tables scroll */
   .dt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
